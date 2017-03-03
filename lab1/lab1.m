@@ -133,6 +133,22 @@ norm_lr1 = sqrt(dot(normal_lr1, normal_lr1));
 norm_lr2 = sqrt(dot(normal_lr2, normal_lr2));
 angle_lr1_lr2 = acos(dot(normal_lr1, normal_lr2)/(norm_lr1*norm_lr2));
 
+
+% Angle between line 3 and line 4 before rectification
+normal_l3 = [l3(1)/l3(3) l3(2)/l3(3)];
+normal_l4 = [l4(1)/l4(3) l4(2)/l4(3)];
+norm_l3 = sqrt(dot(normal_l3, normal_l3));
+norm_l4 = sqrt(dot(normal_l4, normal_l4));
+angle_l3_l4 = acos(dot(normal_l3, normal_l4)/(norm_l3*norm_l4));
+
+% Angle between line 3 and line 4 after rectification
+normal_lr3 = [lr3(1)/lr3(3) lr3(2)/lr3(3)];
+normal_lr4 = [lr4(1)/lr4(3) lr4(2)/lr4(3)];
+norm_lr3 = sqrt(dot(normal_lr3, normal_lr3));
+norm_lr4 = sqrt(dot(normal_lr4, normal_lr4));
+angle_lr3_lr4 = acos(dot(normal_lr3, normal_lr4)/(norm_lr3*norm_lr4));
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric Rectification
 
@@ -147,6 +163,57 @@ angle_lr1_lr2 = acos(dot(normal_lr1, normal_lr2)/(norm_lr1*norm_lr2));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
+% a = [1 2 3];
+% b = [4 5 6];
+% A = [a; b];
+% c = null(A);
+
+
+% Choose the image points
+I = imread('Data/0000_s.png');
+A = load('Data/0000_s_info_lines.txt');
+
+% Indices of lines
+% Pairs of orthogonal lines
+Pairs_lines = [424 712;...
+                565 240;...
+                534 227;
+                576 367;
+                424 565];
+M = zeros(5, 6);
+
+for k = 1:5
+    
+    i = Pairs_lines(k, 1);
+    p1 = [A(i,1) A(i,2) 1]';
+    p2 = [A(i,3) A(i,4) 1]';
+    
+    i = Pairs_lines(k, 2);
+    p3 = [A(i,1) A(i,2) 1]';
+    p4 = [A(i,3) A(i,4) 1]';
+    
+    % Compute pair of orthogonal lines
+    l = cross(p1, p2);
+    m = cross(p3, p4);
+    % Introduce values in the linear system to solve
+    M(k, :) = [l(1)*m(1) (l(1)*m(2) + l(2)*m(1))/2 ...
+        l(2)*m(2) (l(1)*m(3) + l(3)*m(1))/2 ...
+        (l(2)*m(3) + l(3)*m(2))/2, l(3)*m(3)];
+end
+% Compute the solution of M*c = 0, which is equivalent to find null space
+% of M
+c = null(M);
+% c = (a, b, c, d, e, f)
+% Compute C_infinity^*
+C_infinity = [c(1) c(2)/2 c(4)/2; ...
+            c(2)/2 c(3) c(5)/2; ...
+            c(4)/2 c(5)/2 c(6)];
+[U, S, V] = svd(C_infinity);
+[P, D] = eig(C_infinity);
+isequal(U, V')
+
+% H = U;
+% H = U*D;
 
 %% 5. OPTIONAL: Affine Rectification of the left facade of image 0000
 
