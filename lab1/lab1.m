@@ -15,11 +15,16 @@
 I=imread('Data/0005_s.png'); % we have to be in the proper folder
 
 % ToDo: generate a matrix H which produces a similarity transformation
-H=[0.707     -0.707     0;
-  0.707    0.707     0;
+H=[0.8660     -0.5     0;
+  0.5    0.8660    0;
    0     0     1];
+
+tform = affine2d(H);
+
 I2 = apply_H(I, H,size(I));
-figure; imshow(I); figure; imshow(uint8(I2));
+I3 = imwarp(I,tform);
+
+figure; imshow(I); figure; imshow(uint8(I2));%figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 
 
 %% 1.2. Affinities
