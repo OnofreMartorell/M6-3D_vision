@@ -12,12 +12,12 @@
 
 
 %% 1.1. Similarities
-I=imread('Data/0005_s.png'); % we have to be in the proper folder
+I = imread('Data/0005_s.png'); % we have to be in the proper folder
 
 % ToDo: generate a matrix H which produces a similarity transformation
 
 scaleFactor = 1;
-rotationAngle = 0.5236;
+rotationAngle = pi/4;
 translationX = 0;
 translationY = 0;
 
@@ -27,10 +27,12 @@ H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    tra
 
 tform = projective2d(H);
 
-I2 = apply_H(I, H);
-I3 = imwarp(I,tform);
 
-figure; imshow(I); figure; imshow(uint8(I2));figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
+I3 = imwarp(I,tform);
+I2 = apply_H(I, H);
+figure; imshow(I); 
+% figure; imshow(uint8(I2));
+figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 
 %% 1.2. Affinities
 
