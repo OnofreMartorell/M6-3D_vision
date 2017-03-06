@@ -17,7 +17,7 @@ I = imread('Data/0005_s.png'); % we have to be in the proper folder
 % ToDo: generate a matrix H which produces a similarity transformation
 
 scaleFactor = 1;
-rotationAngle = pi/4;
+rotationAngle = pi/6;
 translationX = 0;
 translationY = 0;
 
@@ -27,17 +27,19 @@ H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    tra
 
 tform = projective2d(H);
 
-
+close all
 I3 = imwarp(I,tform);
 I2 = apply_H(I, H);
 figure; imshow(I); 
-% figure; imshow(uint8(I2));
+figure; imshow(uint8(I2));
 figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 
 %% 1.2. Affinities
 
 % ToDo: generate a matrix H which produces an affine transformation
-
+H = [1 0 0;
+    tan(-pi/6) 1 0;
+    0 0 1];
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
 
@@ -55,7 +57,9 @@ figure; imshow(I); figure; imshow(uint8(I2));
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-
+H = [2 6 3.5;
+    3.2 1 1.2;
+    0 9 1];
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
 
@@ -89,7 +93,7 @@ l3 = cross(p5, p6);
 l4 = cross(p7, p8);
 
 % Show the chosen lines in the image
-figure;imshow(I);
+figure; imshow(I);
 hold on;
 t = 1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
@@ -120,7 +124,7 @@ lr3 = H_inv*l3;
 lr4 = H_inv*l4;
 
 % show the transformed lines in the transformed image
-figure;imshow(uint8(I2));
+figure; imshow(uint8(I2));
 hold on;
 t = 1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
