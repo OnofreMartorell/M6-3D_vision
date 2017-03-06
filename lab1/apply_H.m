@@ -5,13 +5,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function [ destination_Image ] = apply_H( original_Image , H , siz )
+function [ destination_Image ] = apply_H( original_Image , H )
 %apply_H Performs a specific homography to a given image
 %   Inpunt:
 %       -Original Image: Image to be transformed
 %       -H: matrix 3x3 which defines the homography
-%       -siz: size of the destination image
-%
+%    
 %   Output:
 %       -Destination Image: Image after homography
 %       -First the destination image size is computed from the four
@@ -21,7 +20,8 @@ function [ destination_Image ] = apply_H( original_Image , H , siz )
 %       -Afterwards, the points are draw on its place.
 %
     close all
-
+    siz = size(original_Image);
+    
 %   The homography is called T because maybe further changes will be done
     T0 = (H);
     
@@ -52,10 +52,12 @@ function [ destination_Image ] = apply_H( original_Image , H , siz )
     %  An iniziatization of the destination image is done
     destination_Image = uint8(zeros(round(newendX-newzeroX), round(newendY-newzeroY), 3));
     s = size(destination_Image);
-     T1= T0 +  [ 0     0     round(newzeroX);
-                   0     0   round(newzeroY);
-                   0     0     0];
-    T = pinv(T1);
+    
+%      T1= T0 +  [ 0     0     round(newzeroX);
+%                    0     0   round(newzeroY);
+%                    0     0     0];
+    
+    T = inv(T0);
         
     
 %   Every pixel is backtransform
@@ -65,12 +67,12 @@ for row = 1:s(1)
 %       The pixel is transform
         p = double([col row 1]');
         ph = T*p;
-        
+           
 %       cartesian coordinates are obtained
         pcart(1) = ph(1) / ph(3);
         pcart(2) = ph(2) / ph(3);
-        cim = pcart(1);
-        rim = pcart(2);
+        cim = pcart(1) + newzeroX;
+        rim = pcart(2) + newzeroY;
         
 %       Rounding so an integer is computed since they are coordinates        
         cc = round(cim);
@@ -79,9 +81,7 @@ for row = 1:s(1)
 %       The pixels are placed on the destination image
 %       (First is check the pixel belongs to the original image)
         if cc>0 && cc<=size(original_Image, 2) && rr>0 && rr<=size(original_Image, 1)
-            destination_Image(row, col, :) = original_Image(rr, cc, :);
-        else
-            destination_Image(row, col, :) = [0,0,0];
+            destination_Image(row, col , :) = original_Image(rr, cc, :);
         end
     end
 end
