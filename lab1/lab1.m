@@ -12,6 +12,8 @@
 
 
 %% 1.1. Similarities
+close all
+
 I = imread('Data/0005_s.png'); % we have to be in the proper folder
 
 % ToDo: generate a matrix H which produces a similarity transformation
@@ -25,11 +27,12 @@ H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    tra
    scaleFactor *  sin(rotationAngle)    scaleFactor *  cos(rotationAngle)    translationY;
             0                                    0                                 1     ];
 
-tform = projective2d(H);
+I2 = apply_H(I, H);     %Handcrafted method
+        
+tform = projective2d(H); 
+I3 = imwarp(I,tform);   %Matlab method for checking
 
-close all
-I3 = imwarp(I, tform);
-I2 = apply_H(I, H);
+
 figure; imshow(I); 
 figure; imshow(uint8(I2));
 figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
@@ -37,26 +40,76 @@ figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 %% 1.2. Affinities
 
 % ToDo: generate a matrix H which produces an affine transformation
-H = [1 0 0;
-    tan(-pi/6) 1 0;
-    0 0 1];
+translationX = 3.2;
+translationY = -12;
+
+affine =  [cos(pi/7) 7;tan(-pi/6) 1]; %|affine| must be nonzero (affine non singular)
+
+H = [affine(1,1)          affine(1,2)       translationX;
+     affine(2,1)          affine(2,2)       translationY;
+        0                      0                 1      ];
+
 I2 = apply_H(I, H);
+
 figure; imshow(I); figure; imshow(uint8(I2));
 
 % ToDo: decompose the affinity in four transformations: two
 % rotations, a scale, and a translation
 
+%The translation is extracted from the last elements on the first and
+%second column. The rotation and the scale factor are extracted from Single
+%Value Decomposition. %So U is a rotation, S an anisotropic scaling and V 
+%another rotation. The matrix are:
+
+[U,S,V] = svd(affine);  % H = U*S*V' and H = U*V' * V * D * V'
+
+T = [1       0   translationX;
+     0       1   translationY;
+     0       0         1    ];
+
+R1 = [U(1,1)       U(1,2)        0;
+      U(2,1)       U(2,2)        0;
+      0             0            1];
+ 
+R2 = [V(1,1)       V(1,2)        0;
+      V(2,1)       V(2,2)        0;
+      0             0            1];
+ 
+Sc = [S(1,1)       0          0;
+     0           S(2,2)       0;
+     0             0          1];
+ 
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
 
+M = T*R1*Sc*R2;
+
+threshold = 1e-10; 
+% set your level of accuracy for "equality" since computationally they are
+% not "equal"
+
+ if all(abs(H - M)<=threshold)
+     disp('Both transformations are the same!')
+ else
+     disp('The transformations do not match...')
+ end
+ 
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
 
+Inew = apply_H(I,M);
+figure; imshow(I); figure; imshow(uint8(I2));figure; imshow(uint8(Inew));
+ if isequal(I2,Inew)
+     disp('Both transformed images are the same!')
+ else
+     disp('The transformed images do not match...')
+ end
 
 
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
+
 theta = 10;
 H = [cosd(theta) -sind(theta) 0.001; 
     sind(theta) cosd(theta) 0.01; 
@@ -64,6 +117,7 @@ H = [cosd(theta) -sind(theta) 0.001;
 tform = projective2d(H);
 outputImage = imwarp(I, tform);
 figure, imshow(outputImage);
+
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
 
