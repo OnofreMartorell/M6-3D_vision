@@ -50,7 +50,7 @@ newzero = min(p_transf_cartesian);
 newend = max(p_transf_cartesian);
 
 % Initialization of the destination image
-destination_Image = uint8(zeros(round(newend(1) - newzero(1)-2), round(newend(2) - newzero(2)-2), 3));
+destination_Image = uint8(zeros(round(newend(1) - newzero(1)), round(newend(2) - newzero(2)), 3));
 size_destination = size(destination_Image);
 
 if strcmp(interpolation, 'linear')

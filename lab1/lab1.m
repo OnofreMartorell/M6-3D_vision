@@ -71,8 +71,8 @@ R1 = [U(1,1)       U(1,2)        0;
       U(2,1)       U(2,2)        0;
       0             0            1];
  
-R2 = [V(1,1)       V(1,2)        0;
-      V(2,1)       V(2,2)        0;
+R2 = [V(1,1)       V(2,1)        0;
+      V(1,2)       V(2,2)        0;
       0             0            1];
  
 Sc = [S(1,1)       0          0;
@@ -98,7 +98,7 @@ threshold = 1e-10;
 % transformations over the image I produces the same image I2 as before
 
 Inew = apply_H(I,M);
-figure; imshow(I); figure; imshow(uint8(I2)),title 'Transformed with H';figure; imshow(uint8(Inew)), title 'Transformed with M';
+figure; imshow(I); figure; imshow(uint8(I2)),title 'Transformed with H';figure; imshow(uint8(Inew)), title 'Transformed with decomposed transformations';
  if isequal(I2,Inew)
      disp('Both transformed images are the same!')
  else
@@ -115,9 +115,10 @@ figure, imshow(uint8(It)), title 'Final waterfall transformed'
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-H = [0.7        0.1         3;
-    0.5         0.3         4;
-    0.000003    0.000007    1];
+H = [cos(pi/3)    -sin(pi/3)     0;
+     sin(pi/3)     sin(pi/3)     0;
+    0.0003         0.0003        1];
+
 
 I2 = apply_H(I, H, 'linear');
 figure; imshow(I); figure; imshow(uint8(I2));
