@@ -167,8 +167,8 @@ hold on;
 t = 1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
-plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
-plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'r');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'r');
 
 % ToDo: compute the homography that affinely rectifies the image
 
@@ -208,8 +208,8 @@ figure; imshow(uint8(I2));
 hold on;
 t = 1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
-plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'g');
-plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'b');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'r');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
@@ -355,8 +355,8 @@ A = load('Data/0000_s_info_lines.txt');
 
 % Indices of lines
 % Pairs of orthogonal lines
-Pairs_lines = [424 712;...
-                565 240;...
+Pairs_lines = [424 712;
+                565 240;
                 534 227;
                 576 367];
 M = zeros(5, 6);
@@ -370,7 +370,7 @@ mr = zeros(5,3);
 angle_l_m = zeros(5,1);
 angle_lr_mr = zeros(5,1);
 
-for k = 1:4
+for k = 1:3
     i = Pairs_lines(k, 1);
     p1 = [A(i, 1) A(i, 2) 1]';
     p2 = [A(i, 3) A(i, 4) 1]';
@@ -393,7 +393,7 @@ for k = 1:4
     plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
     plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
 end
-%
+
 i = 424;
 p1 = [A(i,1) A(i,2) 1]';
 p2 = [A(i,3) A(i,4) 1]';
@@ -404,6 +404,42 @@ i = 712;
 p5 = [A(i,1) A(i,2) 1]';
 p6 = [A(i,3) A(i,4) 1]';
 i = 565;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+l1 = cross(p1, p2);
+l2 = cross(p3, p4);
+l3 = cross(p5, p6);
+l4 = cross(p7, p8);
+
+x13 = cross(l1, l3);
+x23 = cross(l2, l3);
+x24 = cross(l2, l4);
+x14 = cross(l1, l4);
+
+k = 4;
+l(:, k) = cross(x14, x23);
+m(:, k) = cross(x13, x24);
+% Introduce values in the linear system to solve
+M(k, :) = [l(1,k)*m(1,k) (l(1,k)*m(2,k) + l(2,k)*m(1,k))/2 ...
+    l(2,k)*m(2,k) (l(1,k)*m(3,k) + l(3,k)*m(1,k))/2 ...
+    (l(2,k)*m(3,k) + l(3,k)*m(2,k))/2, l(3,k)*m(3,k)];
+
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
+plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
+
+i = 227;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 367;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 534;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 576;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
 
@@ -430,44 +466,51 @@ t = 1:0.1:1000;
 plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
 plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
 
-
 % Compute the solution of M*c = 0, which is equivalent to find null space
 % of M
 c = null(M);
 % Compute C_infinity^*
-C_infinity = [c(1) c(2)/2 c(4)/2; ...
-            c(2)/2 c(3) c(5)/2; ...
-            c(4)/2 c(5)/2 c(6)];
-        
-[U, S, V] = svd(C_infinity);
-
-[P, D] = eig(C_infinity);
-H = P;
-% isequal(U, V')
-    
-% [U, lambda] = eig(C_infinity);
+%
+% Cstarinf = [c(1) c(2)/2 c(4)/2; c(2)/2 c(3) c(5)/2; c(4)/2 c(5)/2 c(6)];
+% [U, lambda] = eig(Cstarinf);
 % U_T = U';
-% ss = [sqrt(lambda(1)) 0 0; 0 sqrt(lambda(2)) 0; 0 0 0];
+% ss = [sqrt(lambda(1)) 0; 0 sqrt(lambda(2))];
 % U_T = ss*U_T;
 % U = U_T';
 % T = inv(U);
+%
+C_infinity = [c(1) c(2)/2 c(4)/2; 
+            c(2)/2 c(3) c(5)/2; 
+            c(4)/2 c(5)/2 c(6)];
+[P, D] = eig(C_infinity);
+
+% [~,idx] = sort(abs(lambda), 'descend');
+% lambda = lambda(idx);
 % 
-% H = U*D;
+% ss = [sqrt(lambda(1)) 0 0; 0 sqrt(lambda(2)) 0; 0 0 0];
+
+% H2 = P*ss;
+    
+[U, S, V] = svd(C_infinity);
+
+% H2 = inv(U);
+
+H2 = (U);
 
 
 % Apply homography
-I2 = apply_H(permute(I, [2 1 3]), H);
+I2 = apply_H(permute(I, [2 1 3]), H2);
 I2 = permute(I2, [2 1 3]);
 
 
-H = inv(U)';
+H_inv = inv(H2)';
 
 figure;imshow(uint8(I2));
 
 for k = 1:5
     % Compute the transformed lines -> l'= H^-T*l
-    lr(k,:) = H*l(:,k);
-    mr(k,:) = H*m(:,k);
+    lr(k,:) = H_inv*l(:, k);
+    mr(k,:) = H_inv*m(:, k);
     
     %figure;imshow(uint8(I));
     hold on;
