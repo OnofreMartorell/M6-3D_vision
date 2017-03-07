@@ -1,8 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%    Apply Homgraphy     %%%%%%%%%%%%%%%%%%%%%%%%%%
+                      %%    Apply Homgraphy    %%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
 function [ destination_Image ] = apply_H( original_Image , H )
 %apply_H Performs a specific homography to a given image
 %   Inpunt:
@@ -26,7 +27,7 @@ function [ destination_Image ] = apply_H( original_Image , H )
     size_transposed = size(transposed_Im);
     
 %   The corners are localized and transformed so the destination size 
-%   can be computed    
+%   can be computed.
     
     p1 = double([1, 1, 1]');
     p2 = double([1, size_original(2), 1]');
