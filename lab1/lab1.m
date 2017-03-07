@@ -119,7 +119,7 @@ H = [0.7        0.1         3;
     0.5         0.3         4;
     0.000003    0.000007    1];
 
-I2 = apply_H(I, H,"linear");
+I2 = apply_H(I, H, 'linear');
 figure; imshow(I); figure; imshow(uint8(I2));
 
 
@@ -178,12 +178,7 @@ H = [1 0 0;
 
 I2 = apply_H(permute(I, [2 1 3]), H);
 
-% tform = projective2d(H);
-
-% I3 = imwarp(I, tform);
 I2 = permute(I2, [2 1 3]);
-% figure; imshow(uint8(I3));
-
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
@@ -194,7 +189,7 @@ lr2 = Hm_inv*l2;
 lr3 = Hm_inv*l3;
 lr4 = Hm_inv*l4;
 
-% show the transformed lines in the transformed image
+% Show the transformed lines in the transformed image
 figure; imshow(uint8(I2));
 hold on;
 t = 1:0.1:1000;
@@ -279,7 +274,7 @@ M = [l1(1)*m1(1), l1(1)*m1(2) + l1(2)*m1(1), l1(2)*m1(2);
 % Find s and S from the null space of the constraints matrix
 s = null(M);
 S = [s(1) s(2); s(2) s(3)];
-[K, p] = chol(S, 'upper');
+[K, ~] = chol(S, 'upper');
 
 Hm = eye(3);
 Hm(1:2,1:2) = inv(K);
@@ -461,30 +456,12 @@ plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
 % of M
 c = null(M);
 % Compute C_infinity^*
-%
-% Cstarinf = [c(1) c(2)/2 c(4)/2; c(2)/2 c(3) c(5)/2; c(4)/2 c(5)/2 c(6)];
-% [U, lambda] = eig(Cstarinf);
-% U_T = U';
-% ss = [sqrt(lambda(1)) 0; 0 sqrt(lambda(2))];
-% U_T = ss*U_T;
-% U = U_T';
-% T = inv(U);
-%
 C_infinity = [c(1) c(2)/2 c(4)/2; 
             c(2)/2 c(3) c(5)/2; 
             c(4)/2 c(5)/2 c(6)];
 [P, D] = eig(C_infinity);
-
-% [~,idx] = sort(abs(lambda), 'descend');
-% lambda = lambda(idx);
-% 
-% ss = [sqrt(lambda(1)) 0 0; 0 sqrt(lambda(2)) 0; 0 0 0];
-
-% H2 = P*ss;
     
-[U, S, V] = svd(C_infinity);
-
-% H2 = inv(U);
+[U, ~, V] = svd(C_infinity);
 
 H2 = (U);
 
