@@ -109,7 +109,7 @@ figure; imshow(I); figure; imshow(uint8(I2));figure; imshow(uint8(Inew));
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-
+I = imread('Data/0005_s.png');
 theta = 10;
 H = [cosd(theta) -sind(theta) 0.001; 
     sind(theta) cosd(theta) 0.01; 
@@ -183,12 +183,16 @@ l_inf = l_inf/norm(l_inf);
 H = [1 0 0; 
     0 1 0; 
     l_inf'];
-I2 = apply_H(I, H);
-tform = projective2d(H);
 
-I3 = imwarp(I, tform);
-% permute(I, [2 1 3])
-figure; imshow(uint8(I3));
+I = permute(I, [2 1 3]);
+I2 = apply_H(I, H);
+
+% tform = projective2d(H);
+
+% I3 = imwarp(I, tform);
+I2 = permute(I2, [2 1 3]);
+% figure; imshow(uint8(I3));
+
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
