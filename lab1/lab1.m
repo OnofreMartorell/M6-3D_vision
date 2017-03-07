@@ -28,7 +28,7 @@ H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    tra
 tform = projective2d(H);
 
 close all
-I3 = imwarp(I,tform);
+I3 = imwarp(I, tform);
 I2 = apply_H(I, H);
 figure; imshow(I); 
 figure; imshow(uint8(I2));
@@ -57,12 +57,27 @@ figure; imshow(I); figure; imshow(uint8(I2));
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-H = [2 6 3.5;
-    3.2 1 1.2;
-    0 9 1];
+theta = 10;
+H = [cosd(theta) -sind(theta) 0.001; 
+    sind(theta) cosd(theta) 0.01; 
+    0 0 1];
+tform = projective2d(H);
+outputImage = imwarp(I, tform);
+figure, imshow(outputImage);
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
 
+
+%%
+A = imread('Data/0000_s.png');
+% Create geometric transformation object.
+
+theta = 10;
+tform = projective2d([cosd(theta) -sind(theta) 0.001; sind(theta) cosd(theta) 0.01; 0 0 1]);
+% Apply transformation and view image.
+
+outputImage = imwarp(A,tform);
+figure, imshow(outputImage);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 
@@ -110,9 +125,16 @@ v2 = cross(l3, l4);
 % Line at infinity
 l_inf = cross(v1, v2);
 
-H = [1 0 0; 0 1 0; l_inf'];
+l_inf = l_inf/norm(l_inf);
+H = [1 0 0; 
+    0 1 0; 
+    l_inf'];
 I2 = apply_H(I, H);
-figure; imshow(uint8(I2));
+tform = projective2d(H);
+
+I3 = imwarp(I, tform);
+% permute(I, [2 1 3])
+figure; imshow(uint8(I3));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
@@ -148,7 +170,6 @@ normal_lr2 = [lr2(1)/lr2(3) lr2(2)/lr2(3)];
 norm_lr1 = sqrt(dot(normal_lr1, normal_lr1));
 norm_lr2 = sqrt(dot(normal_lr2, normal_lr2));
 angle_lr1_lr2 = acos(dot(normal_lr1, normal_lr2)/(norm_lr1*norm_lr2));
-
 
 % Angle between line 3 and line 4 before rectification
 normal_l3 = [l3(1)/l3(3) l3(2)/l3(3)];

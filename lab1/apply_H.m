@@ -19,10 +19,7 @@ function [ destination_Image ] = apply_H( original_Image , H )
     
     size_original = size(original_Image);
     
-    transposed_Im = zeros(size_original(2), size_original(1), 3);
-    for i = 1:3
-        transposed_Im(:, :, i) = original_Image(:, :, i)';
-    end
+    transposed_Im = permute(original_Image, [2 1 3]);
     size_transposed = size(transposed_Im);
     
 %   The corners are localized and transformed so the destination size 
