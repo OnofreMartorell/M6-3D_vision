@@ -197,30 +197,30 @@ I2 = permute(I2, [2 1 3]);
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
 
-H_inv = inv(H)';
-lr1 = H_inv*l1;
-lr2 = H_inv*l2;
-lr3 = H_inv*l3;
-lr4 = H_inv*l4;
+Hm_inv = inv(H)';
+lr1 = Hm_inv*l1;
+lr2 = Hm_inv*l2;
+lr3 = Hm_inv*l3;
+lr4 = Hm_inv*l4;
 
 % show the transformed lines in the transformed image
 figure; imshow(uint8(I2));
 hold on;
 t = 1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
-plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
-plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
-plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'g');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'b');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
 
 % Angle between line 1 and line 2 before rectification
 normal_l1 = [l1(1)/l1(3) l1(2)/l1(3)];
-normal_l2 = [l2(1)/l2(3) l2(2)/l2(3)];
+normal_d1 = [l2(1)/l2(3) l2(2)/l2(3)];
 norm_l1 = sqrt(dot(normal_l1, normal_l1));
-norm_l2 = sqrt(dot(normal_l2, normal_l2));
-angle_l1_l2 = acos(dot(normal_l1, normal_l2)/(norm_l1*norm_l2));
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+angle_l1_l2 = acos(dot(normal_l1, normal_d1)/(norm_l1*norm_d1));
 
 % Angle between line 1 and line 2 after rectification
 normal_lr1 = [lr1(1)/lr1(3) lr1(2)/lr1(3)];
@@ -255,37 +255,19 @@ angle_lr3_lr4 = acos(dot(normal_lr3, normal_lr4)/(norm_lr3*norm_lr4));
 %       Compute also the angles between the pair of lines before and after
 %       rectification.
 
-Hm = eye(3);
+
 % Compute the lines l1, m1, l2, m2, that pass through the different pairs of points
-l1 = lr1;
-m1 = lr2;
-l2 = lr3;
-m2 = lr4;
+l1 = lr1;m1 = lr2;l2 = lr3;m2 = lr4;
 
-% Choose the image points
-I = imread('Data/0000_s.png');
-A = load('Data/0000_s_info_lines.txt');
+x1 = cross(l1,l2);
+x2 = cross(l1,m2);
+x3 = cross(m1,m2);
+x4 = cross(m1,l2);
 
-% Indices of lines
-i = 424;
-p1 = [A(i,1) A(i,2) 1]';
-p2 = [A(i,3) A(i,4) 1]';
-i = 712;
-p3 = [A(i,1) A(i,2) 1]';
-p4 = [A(i,3) A(i,4) 1]';
-i = 565;
-p5 = [A(i,1) A(i,2) 1]';
-p6 = [A(i,3) A(i,4) 1]';
-i = 240;
-p7 = [A(i,1) A(i,2) 1]';
-p8 = [A(i,3) A(i,4) 1]';
+l1=lr1;m1=lr3;
 
-% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
-% Done
-l1 = cross(p1, p2);
-m1 = cross(p3, p4);
-l2 = cross(p5, p6);
-m2 = cross(p7, p8);
+d1 = cross(x1,x3);
+d2 = cross(x2,x4);
 
 % Show the chosen lines in the image
 figure;imshow(I);
@@ -293,49 +275,40 @@ hold on;
 t = 1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(m1(1)*t + m1(3)) / m1(2), 'y');
-plot(t, -(l2(1)*t + l2(3)) / l2(2), 'g');
-plot(t, -(m2(1)*t + m2(3)) / m2(2), 'g');
+plot(t, -(d1(1)*t + d1(3)) / d1(2), 'g');
+plot(t, -(d2(1)*t + d2(3)) / d2(2), 'g');
 
 % Set up the constraints from the orthogonal line pairs
 M = [l1(1)*m1(1), l1(1)*m1(2) + l1(2)*m1(1), l1(2)*m1(2);
-     l2(1)*m2(1), l2(1)*m2(2) + l2(2)*m2(1), l2(2)*m2(2)];
- 
+     d1(1)*d2(1), d1(1)*d2(2) + d1(2)*d2(1), d1(2)*d2(2)];
+
 % Find s and S from the null space of the constraints matrix
 s = null(M);
 S = [s(1) s(2); s(2) s(3)];
-
-% [R,p] = chol(A) for positive definite A, produces an upper triangular matrix
-% R from the diagonal and upper triangle of matrix A, satisfying the
-% equation R'*R=A and p is zero. If A is not positive definite, then p is
-% a positive integer and MATLAB does not generate an error. When A is full,
-% R is an upper triangular matrix of order q=p-1 such that R'*R=A(1:q,1:q).
-% When A is sparse, R is an upper triangular matrix of size q-by-n so that
-% the L-shaped region of the first q rows and first q columns of R'*R agree
-% with those of A.
-
 [K,p] = chol(S,'upper');
-Hm(1:2,1:2) = K;
-Hm = inv(Hm);
+
+Hm = eye(3);
+Hm(1:2,1:2) = inv(K);
 
 % Apply homography
-I3 = apply_H(I2, H_m);
+I3 = apply_H(I2, Hm);
 
 % Compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
-H_inv = inv(H)';
-l1mr = H_m*l1;
-m1mr = H_m*m1;
-l2mr = H_m*l2;
-m2mr = H_m*m2;
+Hm_inv = inv(Hm)';
+l1mr = Hm_inv*l1;
+m1mr = Hm_inv*m1;
+d1mr = Hm_inv*d1;
+d2mr = Hm_inv*d2;
 
 % Show the transformed lines in the transformed image
-figure;imshow(uint8(I2));
+figure;imshow(uint8(I3));
 hold on;
 t = 1:0.1:1000;
 plot(t, -(l1mr(1)*t + l1mr(3)) / l1mr(2), 'y');
 plot(t, -(m1mr(1)*t + m1mr(3)) / m1mr(2), 'y');
-plot(t, -(l2mr(1)*t + l2mr(3)) / l2mr(2), 'g');
-plot(t, -(m2mr(1)*t + m2mr(3)) / m2mr(2), 'g');
+plot(t, -(d1mr(1)*t + d1mr(3)) / d1mr(2), 'g');
+plot(t, -(d2mr(1)*t + d2mr(3)) / d2mr(2), 'g');
 
 % Evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
@@ -355,28 +328,22 @@ norm_m1mr = sqrt(dot(normal_m1mr, normal_m1mr));
 angle_l1mr_m1mr = acos(dot(normal_l1mr, normal_m1mr)/(norm_l1mr*norm_m1mr));
 
 % Angle between line 3 and line 4 before rectification
-normal_l2 = [l2(1)/l2(3) l2(2)/l2(3)];
-normal_m2 = [m2(1)/m2(3) m2(2)/m2(3)];
-norm_l2 = sqrt(dot(normal_l2, normal_l2));
-norm_m2 = sqrt(dot(normal_m2, normal_m2));
-angle_l2_m2 = acos(dot(normal_l2, normal_m2)/(norm_l2*norm_m2));
+normal_d1 = [d1(1)/d1(3) d1(2)/d1(3)];
+normal_d2 = [d2(1)/d2(3) d2(2)/d2(3)];
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+norm_d2 = sqrt(dot(normal_d2, normal_d2));
+angle_d1_d2 = acos(dot(normal_d1, normal_d2)/(norm_d1*norm_d2));
 
 % Angle between line 3 and line 4 after rectification
-normal_l2mr = [l2mr(1)/l2mr(3) l2mr(2)/l2mr(3)];
-normal_m2mr = [m2mr(1)/m2mr(3) m2mr(2)/m2mr(3)];
-norm_l2mr = sqrt(dot(normal_l2mr, normal_l2mr));
-norm_m2mr = sqrt(dot(normal_m2mr, normal_m2mr));
-angle_l2mr_m2mr = acos(dot(normal_l2mr, normal_m2mr)/(norm_l2mr*norm_m2mr));
+normal_d1mr = [d1mr(1)/d1mr(3) d1mr(2)/d1mr(3)];
+normal_d2mr = [d2mr(1)/d2mr(3) d2mr(2)/d2mr(3)];
+norm_d1mr = sqrt(dot(normal_d1mr, normal_d1mr));
+norm_d2mr = sqrt(dot(normal_d2mr, normal_d2mr));
+angle_d1mr_d2mr = acos(dot(normal_d1mr, normal_d2mr)/(norm_d1mr*norm_d2mr));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
-% a = [1 2 3];
-% b = [4 5 6];
-% A = [a; b];
-% c = null(A);
-
-
 % Choose the image points
 I = imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
@@ -390,8 +357,16 @@ Pairs_lines = [424 712;...
                 424 565];
 M = zeros(5, 6);
 
-for k = 1:5
-    
+colors = ['r','g','c','b','y'];
+figure;imshow(uint8(I));
+l = zeros(3,5);
+m = zeros(3,5);
+lr = zeros(5,3);
+mr = zeros(5,3);
+angle_l_m = zeros(5,1);
+angle_lr_mr = zeros(5,1);
+
+for k = 1:5   
     i = Pairs_lines(k, 1);
     p1 = [A(i,1) A(i,2) 1]';
     p2 = [A(i,3) A(i,4) 1]';
@@ -401,28 +376,71 @@ for k = 1:5
     p4 = [A(i,3) A(i,4) 1]';
     
     % Compute pair of orthogonal lines
-    l = cross(p1, p2);
-    m = cross(p3, p4);
+    l(:,k) = cross(p1, p2);
+    m(:,k) = cross(p3, p4);
     % Introduce values in the linear system to solve
-    M(k, :) = [l(1)*m(1) (l(1)*m(2) + l(2)*m(1))/2 ...
-        l(2)*m(2) (l(1)*m(3) + l(3)*m(1))/2 ...
-        (l(2)*m(3) + l(3)*m(2))/2, l(3)*m(3)];
+    M(k, :) = [l(1,k)*m(1,k) (l(1,k)*m(2,k) + l(2,k)*m(1,k))/2 ...
+        l(2,k)*m(2,k) (l(1,k)*m(3,k) + l(3,k)*m(1,k))/2 ...
+        (l(2,k)*m(3,k) + l(3,k)*m(2,k))/2, l(3,k)*m(3,k)];
+    
+    %figure;imshow(uint8(I));
+    hold on;
+    t = 1:0.1:1000;
+    plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
+    plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
 end
 % Compute the solution of M*c = 0, which is equivalent to find null space
 % of M
 c = null(M);
-% c = (a, b, c, d, e, f)
 % Compute C_infinity^*
 C_infinity = [c(1) c(2)/2 c(4)/2; ...
             c(2)/2 c(3) c(5)/2; ...
             c(4)/2 c(5)/2 c(6)];
+        
 [U, S, V] = svd(C_infinity);
-[P, D] = eig(C_infinity);
-isequal(U, V')
+% [P, D] = eig(C_infinity);
+% isequal(U, V')
+    
+% [U, lambda] = eig(C_infinity);
+% U_T = U';
+% ss = [sqrt(lambda(1)) 0; 0 sqrt(lambda(2))];
+% U_T = ss*U_T;
+% U = U_T';
+% T = inv(U);
 
-% H = U;
 % H = U*D;
 
+% Apply homography
+I2 = apply_H(I, U);
+
+H = inv(U)';
+
+%figure;imshow(uint8(I2));
+for k = 1:5
+    % Compute the transformed lines -> l'= H^-T*l
+    lr(k,:) = H*l(:,k);
+    mr(k,:) = H*m(:,k);
+    
+    %figure;imshow(uint8(I));
+    hold on;
+    t = 1:0.1:1000;
+    plot(t, -(lr(k,1)*t + lr(k,3)) / lr(k,2), colors(k));
+    plot(t, -(mr(k,1)*t + mr(k,3)) / mr(k,2), colors(k));
+    
+    % Angle between pair lines before rectification
+    normal_l = [l(1,k)/l(3,k) l(2,k)/l(3,k)];
+    normal_m = [m(1,k)/m(3,k) m(2,k)/m(3,k)];
+    norm_l = sqrt(dot(normal_l, normal_l));
+    norm_m = sqrt(dot(normal_m, normal_m));
+    angle_l_m(k,1) = acos(dot(normal_l, normal_m)/(norm_l*norm_m));
+    
+    % Angle between pair lines after rectification
+    normal_lr = [lr(k,1)/lr(k,3) lr(k,2)/lr(k,3)];
+    normal_mr = [mr(k,1)/mr(k,3) mr(k,2)/mr(k,3)];
+    norm_lr = sqrt(dot(normal_lr, normal_lr));
+    norm_mr = sqrt(dot(normal_mr, normal_mr));
+    angle_lr_mr(k,1) = acos(dot(normal_lr, normal_mr)/(norm_lr*norm_mr));
+end
 %% 5. OPTIONAL: Affine Rectification of the left facade of image 0000
 
 %% 6. OPTIONAL: Metric Rectification of the left facade of image 0000
