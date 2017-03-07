@@ -20,8 +20,8 @@ I = imread('Data/0005_s.png'); % we have to be in the proper folder
 
 scaleFactor = 1;
 rotationAngle = pi/6;
-translationX = 0;
-translationY = 0;
+translationX = 10;
+translationY = -5;
 
 H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    translationX;
    scaleFactor *  sin(rotationAngle)    scaleFactor *  cos(rotationAngle)    translationY;
@@ -30,12 +30,12 @@ H=[scaleFactor * cos(rotationAngle)     scaleFactor * -sin(rotationAngle)    tra
 I2 = apply_H(I, H);     %Handcrafted method
         
 tform = projective2d(H); 
-I3 = imwarp(I,tform);   %Matlab method for checking
+%I3 = imwarp(I,tform);   %Matlab method for checking
 
 
 figure; imshow(I); 
 figure; imshow(uint8(I2));
-figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
+%figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 
 %% 1.2. Affinities
 
@@ -43,7 +43,7 @@ figure; imshow(uint8(I3)); %Uncomment for show imwarp as reference
 translationX = 3.2;
 translationY = -12;
 
-affine =  [cos(pi/7) 7;tan(-pi/6) 1]; %|affine| must be nonzero (affine non singular)
+affine =  [0 1;tan(-pi/6) 1]; %|affine| must be nonzero (affine non singular)
 
 H = [affine(1,1)          affine(1,2)       translationX;
      affine(2,1)          affine(2,2)       translationY;
@@ -98,40 +98,31 @@ threshold = 1e-10;
 % transformations over the image I produces the same image I2 as before
 
 Inew = apply_H(I,M);
-figure; imshow(I); figure; imshow(uint8(I2));figure; imshow(uint8(Inew));
+figure; imshow(I); figure; imshow(uint8(I2)),title 'Transformed with H';figure; imshow(uint8(Inew)), title 'Transformed with M';
  if isequal(I2,Inew)
      disp('Both transformed images are the same!')
  else
      disp('The transformed images do not match...')
  end
+ 
+Ir2 = apply_H(I,R2);
+Is = apply_H(Ir2,Sc);
+Ir1 = apply_H(Is,R1);
+It = apply_H(Ir1,T);
+figure, imshow(uint8(It)), title 'Final waterfall transformed'
 
 
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-I = imread('Data/0005_s.png');
-theta = 10;
-H = [cosd(theta) -sind(theta) 0.001; 
-    sind(theta) cosd(theta) 0.01; 
-    0 0 1];
-tform = projective2d(H);
-outputImage = imwarp(I, tform);
-figure, imshow(outputImage);
+H = [0.7        0.1         3;
+    0.5         0.3         4;
+    0.000003    0.000007    1];
 
-I2 = apply_H(I, H);
+I2 = apply_H(I, H,"linear");
 figure; imshow(I); figure; imshow(uint8(I2));
 
 
-%%
-A = imread('Data/0000_s.png');
-% Create geometric transformation object.
-
-theta = 10;
-tform = projective2d([cosd(theta) -sind(theta) 0.001; sind(theta) cosd(theta) 0.01; 0 0 1]);
-% Apply transformation and view image.
-
-outputImage = imwarp(A,tform);
-figure, imshow(outputImage);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 
