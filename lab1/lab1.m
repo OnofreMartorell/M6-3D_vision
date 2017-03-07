@@ -490,11 +490,407 @@ for k = 1:5
     angle_lr_mr(k,1) = acos(dot(normal_lr, normal_mr)/(norm_lr*norm_mr));
 end
 %% 5. OPTIONAL: Affine Rectification of the left facade of image 0000
+%% Affine Rectification
+% Choose the image points
+I = imread('Data/0000_s.png');
+A = load('Data/0000_s_info_lines.txt');
+
+% Indices of lines
+i = 493;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 186;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 48;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 508;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
+% Done
+l1 = cross(p1, p2);
+l2 = cross(p3, p4);
+l3 = cross(p5, p6);
+l4 = cross(p7, p8);
+
+% Show the chosen lines in the image
+figure; imshow(I);
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+
+% ToDo: compute the homography that affinely rectifies the image
+
+% Vanishing points
+v1 = cross(l1, l2);
+v2 = cross(l3, l4);
+
+% Line at infinity
+l_inf = cross(v1, v2);
+
+l_inf = l_inf/norm(l_inf);
+H = [1 0 0; 
+    0 1 0; 
+    l_inf'];
+
+
+I2 = apply_H(permute(I, [2 1 3]), H);
+I2 = permute(I2, [2 1 3]);
+
+% ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+%  l'= H^-T*l
+Hm_inv = inv(H)';
+lr1 = Hm_inv*l1;
+lr2 = Hm_inv*l2;
+lr3 = Hm_inv*l3;
+lr4 = Hm_inv*l4;
+
+% show the transformed lines in the transformed image
+figure; imshow(uint8(I2));
+hold on;
+t = 1:0.1:1000;
+plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'g');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'b');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
+
+% ToDo: to evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
+% Angle between line 1 and line 2 before rectification
+normal_l1 = [l1(1)/l1(3) l1(2)/l1(3)];
+normal_d1 = [l2(1)/l2(3) l2(2)/l2(3)];
+norm_l1 = sqrt(dot(normal_l1, normal_l1));
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+angle_l1_l2 = acos(dot(normal_l1, normal_d1)/(norm_l1*norm_d1));
+
+% Angle between line 1 and line 2 after rectification
+normal_lr1 = [lr1(1)/lr1(3) lr1(2)/lr1(3)];
+normal_lr2 = [lr2(1)/lr2(3) lr2(2)/lr2(3)];
+norm_lr1 = sqrt(dot(normal_lr1, normal_lr1));
+norm_lr2 = sqrt(dot(normal_lr2, normal_lr2));
+angle_lr1_lr2 = acos(dot(normal_lr1, normal_lr2)/(norm_lr1*norm_lr2));
+
+% Angle between line 3 and line 4 before rectification
+normal_l3 = [l3(1)/l3(3) l3(2)/l3(3)];
+normal_l4 = [l4(1)/l4(3) l4(2)/l4(3)];
+norm_l3 = sqrt(dot(normal_l3, normal_l3));
+norm_l4 = sqrt(dot(normal_l4, normal_l4));
+angle_l3_l4 = acos(dot(normal_l3, normal_l4)/(norm_l3*norm_l4));
+
+% Angle between line 3 and line 4 after rectification
+normal_lr3 = [lr3(1)/lr3(3) lr3(2)/lr3(3)];
+normal_lr4 = [lr4(1)/lr4(3) lr4(2)/lr4(3)];
+norm_lr3 = sqrt(dot(normal_lr3, normal_lr3));
+norm_lr4 = sqrt(dot(normal_lr4, normal_lr4));
+angle_lr3_lr4 = acos(dot(normal_lr3, normal_lr4)/(norm_lr3*norm_lr4));
+
 
 %% 6. OPTIONAL: Metric Rectification of the left facade of image 0000
+%% Metric rectification after the affine rectification (stratified solution)
+
+% ToDo: Metric rectification (after the affine rectification) using two non-parallel orthogonal line pairs
+%       As evaluation method you can display the images (before and after
+%       the metric rectification) with the chosen lines printed on it.
+%       Compute also the angles between the pair of lines before and after
+%       rectification.
+
+
+% Compute the lines that pass through the different pairs of points
+l1 = lr1;
+m1 = lr2;
+l2 = lr3;
+m2 = lr4;
+
+x1 = cross(l1, l2);
+x2 = cross(l1, m2);
+x3 = cross(m1, m2);
+x4 = cross(m1, l2);
+
+l1 = lr1;m1 = lr3;
+
+d1 = cross(x1,x3);
+d2 = cross(x2,x4);
+
+% Show the chosen lines in the image
+figure;imshow(I2);
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(m1(1)*t + m1(3)) / m1(2), 'y');
+plot(t, -(d1(1)*t + d1(3)) / d1(2), 'g');
+plot(t, -(d2(1)*t + d2(3)) / d2(2), 'g');
+
+% Set up the constraints from the orthogonal line pairs
+M = [l1(1)*m1(1), l1(1)*m1(2) + l1(2)*m1(1), l1(2)*m1(2);
+     d1(1)*d2(1), d1(1)*d2(2) + d1(2)*d2(1), d1(2)*d2(2)];
+
+% Find s and S from the null space of the constraints matrix
+s = null(M);
+S = [s(1) s(2); s(2) s(3)];
+[K, p] = chol(S, 'upper');
+
+Hm = eye(3);
+Hm(1:2,1:2) = inv(K);
+
+% Apply homography
+I3 = apply_H(permute(I2, [2 1 3]), Hm);
+I3 = permute(I3, [2 1 3]);
+
+
+% Compute the transformed lines lr1, lr2, lr3, lr4
+%  l'= H^-T*l
+Hm_inv = inv(Hm)';
+l1mr = Hm_inv*l1;
+m1mr = Hm_inv*m1;
+d1mr = Hm_inv*d1;
+d2mr = Hm_inv*d2;
+
+% Show the transformed lines in the transformed image
+figure;imshow(uint8(I3));
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1mr(1)*t + l1mr(3)) / l1mr(2), 'y');
+plot(t, -(m1mr(1)*t + m1mr(3)) / m1mr(2), 'y');
+plot(t, -(d1mr(1)*t + d1mr(3)) / d1mr(2), 'g');
+plot(t, -(d2mr(1)*t + d2mr(3)) / d2mr(2), 'g');
+
+% Evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
+% Angle between line 1 and line 2 before rectification
+normal_l1 = [l1(1)/l1(3) l1(2)/l1(3)];
+normal_m1 = [m1(1)/m1(3) m1(2)/m1(3)];
+norm_l1 = sqrt(dot(normal_l1, normal_l1));
+norm_m1 = sqrt(dot(normal_m1, normal_m1));
+angle_l1_m1 = acos(dot(normal_l1, normal_m1)/(norm_l1*norm_m1));
+
+% Angle between line 1 and line 2 after rectification
+normal_l1mr = [l1mr(1)/l1mr(3) l1mr(2)/l1mr(3)];
+normal_m1mr = [m1mr(1)/m1mr(3) m1mr(2)/m1mr(3)];
+norm_l1mr = sqrt(dot(normal_l1mr, normal_l1mr));
+norm_m1mr = sqrt(dot(normal_m1mr, normal_m1mr));
+angle_l1mr_m1mr = acos(dot(normal_l1mr, normal_m1mr)/(norm_l1mr*norm_m1mr));
+
+% Angle between line 3 and line 4 before rectification
+normal_d1 = [d1(1)/d1(3) d1(2)/d1(3)];
+normal_d2 = [d2(1)/d2(3) d2(2)/d2(3)];
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+norm_d2 = sqrt(dot(normal_d2, normal_d2));
+angle_d1_d2 = acos(dot(normal_d1, normal_d2)/(norm_d1*norm_d2));
+
+% Angle between line 3 and line 4 after rectification
+normal_d1mr = [d1mr(1)/d1mr(3) d1mr(2)/d1mr(3)];
+normal_d2mr = [d2mr(1)/d2mr(3) d2mr(2)/d2mr(3)];
+norm_d1mr = sqrt(dot(normal_d1mr, normal_d1mr));
+norm_d2mr = sqrt(dot(normal_d2mr, normal_d2mr));
+angle_d1mr_d2mr = acos(dot(normal_d1mr, normal_d2mr)/(norm_d1mr*norm_d2mr));
 
 %% 7. OPTIONAL: Affine Rectification of the left facade of image 0001
+%% Affine Rectification
+% Choose the image points
+I = imread('Data/0001_s.png');
+A = load('Data/0001_s_info_lines.txt');
+
+% Indices of lines
+i = 614;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 159;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 645;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 541;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
+l1 = cross(p1, p2);
+l2 = cross(p3, p4);
+l3 = cross(p5, p6);
+l4 = cross(p7, p8);
+
+% Show the chosen lines in the image
+figure; imshow(I);
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+
+% ToDo: compute the homography that affinely rectifies the image
+
+% Vanishing points
+v1 = cross(l1, l2);
+v2 = cross(l3, l4);
+
+% Line at infinity
+l_inf = cross(v1, v2);
+
+l_inf = l_inf/norm(l_inf);
+H = [1 0 0; 
+    0 1 0; 
+    l_inf'];
+
+
+I2 = apply_H(permute(I, [2 1 3]), H);
+I2 = permute(I2, [2 1 3]);
+
+% ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+%  l'= H^-T*l
+
+Hm_inv = inv(H)';
+lr1 = Hm_inv*l1;
+lr2 = Hm_inv*l2;
+lr3 = Hm_inv*l3;
+lr4 = Hm_inv*l4;
+
+% show the transformed lines in the transformed image
+figure; imshow(uint8(I2));
+hold on;
+t = 1:0.1:1000;
+plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'g');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'g');
+
+% ToDo: to evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
+% Angle between line 1 and line 2 before rectification
+normal_l1 = [l1(1)/l1(3) l1(2)/l1(3)];
+normal_d1 = [l2(1)/l2(3) l2(2)/l2(3)];
+norm_l1 = sqrt(dot(normal_l1, normal_l1));
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+angle_l1_l2 = acos(dot(normal_l1, normal_d1)/(norm_l1*norm_d1));
+
+% Angle between line 1 and line 2 after rectification
+normal_lr1 = [lr1(1)/lr1(3) lr1(2)/lr1(3)];
+normal_lr2 = [lr2(1)/lr2(3) lr2(2)/lr2(3)];
+norm_lr1 = sqrt(dot(normal_lr1, normal_lr1));
+norm_lr2 = sqrt(dot(normal_lr2, normal_lr2));
+angle_lr1_lr2 = acos(dot(normal_lr1, normal_lr2)/(norm_lr1*norm_lr2));
+
+% Angle between line 3 and line 4 before rectification
+normal_l3 = [l3(1)/l3(3) l3(2)/l3(3)];
+normal_l4 = [l4(1)/l4(3) l4(2)/l4(3)];
+norm_l3 = sqrt(dot(normal_l3, normal_l3));
+norm_l4 = sqrt(dot(normal_l4, normal_l4));
+angle_l3_l4 = acos(dot(normal_l3, normal_l4)/(norm_l3*norm_l4));
+
+% Angle between line 3 and line 4 after rectification
+normal_lr3 = [lr3(1)/lr3(3) lr3(2)/lr3(3)];
+normal_lr4 = [lr4(1)/lr4(3) lr4(2)/lr4(3)];
+norm_lr3 = sqrt(dot(normal_lr3, normal_lr3));
+norm_lr4 = sqrt(dot(normal_lr4, normal_lr4));
+angle_lr3_lr4 = acos(dot(normal_lr3, normal_lr4)/(norm_lr3*norm_lr4));
 
 %% 8. OPTIONAL: Metric Rectification of the left facade of image 0001
+%% Metric rectification after the affine rectification (stratified solution)
 
+% ToDo: Metric rectification (after the affine rectification) using two non-parallel orthogonal line pairs
+%       As evaluation method you can display the images (before and after
+%       the metric rectification) with the chosen lines printed on it.
+%       Compute also the angles between the pair of lines before and after
+%       rectification.
+
+
+% Compute the lines l1, m1, l2, m2, that pass through the different pairs of points
+l1 = lr1;
+m1 = lr2;
+l2 = lr3;
+m2 = lr4;
+
+x1 = cross(l1, l2);
+x2 = cross(l1, m2);
+x3 = cross(m1, m2);
+x4 = cross(m1, l2);
+
+l1 = lr1;m1 = lr3;
+
+d1 = cross(x1,x3);
+d2 = cross(x2,x4);
+
+% Show the chosen lines in the image
+figure;imshow(I2);
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(m1(1)*t + m1(3)) / m1(2), 'y');
+plot(t, -(d1(1)*t + d1(3)) / d1(2), 'g');
+plot(t, -(d2(1)*t + d2(3)) / d2(2), 'g');
+
+% Set up the constraints from the orthogonal line pairs
+M = [l1(1)*m1(1), l1(1)*m1(2) + l1(2)*m1(1), l1(2)*m1(2);
+     d1(1)*d2(1), d1(1)*d2(2) + d1(2)*d2(1), d1(2)*d2(2)];
+
+% Find s and S from the null space of the constraints matrix
+s = null(M);
+S = [s(1) s(2); s(2) s(3)];
+[K, p] = chol(S, 'upper');
+
+Hm = eye(3);
+Hm(1:2,1:2) = inv(K);
+
+% Apply homography
+I3 = apply_H(permute(I2, [2 1 3]), Hm);
+I3 = permute(I3, [2 1 3]);
+
+
+% Compute the transformed lines lr1, lr2, lr3, lr4
+%  l'= H^-T*l
+Hm_inv = inv(Hm)';
+l1mr = Hm_inv*l1;
+m1mr = Hm_inv*m1;
+d1mr = Hm_inv*d1;
+d2mr = Hm_inv*d2;
+
+% Show the transformed lines in the transformed image
+figure;imshow(uint8(I3));
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l1mr(1)*t + l1mr(3)) / l1mr(2), 'y');
+plot(t, -(m1mr(1)*t + m1mr(3)) / m1mr(2), 'y');
+plot(t, -(d1mr(1)*t + d1mr(3)) / d1mr(2), 'g');
+plot(t, -(d2mr(1)*t + d2mr(3)) / d2mr(2), 'g');
+
+% Evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
+% Angle between line 1 and line 2 before rectification
+normal_l1 = [l1(1)/l1(3) l1(2)/l1(3)];
+normal_m1 = [m1(1)/m1(3) m1(2)/m1(3)];
+norm_l1 = sqrt(dot(normal_l1, normal_l1));
+norm_m1 = sqrt(dot(normal_m1, normal_m1));
+angle_l1_m1 = acos(dot(normal_l1, normal_m1)/(norm_l1*norm_m1));
+
+% Angle between line 1 and line 2 after rectification
+normal_l1mr = [l1mr(1)/l1mr(3) l1mr(2)/l1mr(3)];
+normal_m1mr = [m1mr(1)/m1mr(3) m1mr(2)/m1mr(3)];
+norm_l1mr = sqrt(dot(normal_l1mr, normal_l1mr));
+norm_m1mr = sqrt(dot(normal_m1mr, normal_m1mr));
+angle_l1mr_m1mr = acos(dot(normal_l1mr, normal_m1mr)/(norm_l1mr*norm_m1mr));
+
+% Angle between line 3 and line 4 before rectification
+normal_d1 = [d1(1)/d1(3) d1(2)/d1(3)];
+normal_d2 = [d2(1)/d2(3) d2(2)/d2(3)];
+norm_d1 = sqrt(dot(normal_d1, normal_d1));
+norm_d2 = sqrt(dot(normal_d2, normal_d2));
+angle_d1_d2 = acos(dot(normal_d1, normal_d2)/(norm_d1*norm_d2));
+
+% Angle between line 3 and line 4 after rectification
+normal_d1mr = [d1mr(1)/d1mr(3) d1mr(2)/d1mr(3)];
+normal_d2mr = [d2mr(1)/d2mr(3) d2mr(2)/d2mr(3)];
+norm_d1mr = sqrt(dot(normal_d1mr, normal_d1mr));
+norm_d2mr = sqrt(dot(normal_d2mr, normal_d2mr));
+angle_d1mr_d2mr = acos(dot(normal_d1mr, normal_d2mr)/(norm_d1mr*norm_d2mr));
 
