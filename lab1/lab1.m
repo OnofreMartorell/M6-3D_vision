@@ -184,8 +184,8 @@ H = [1 0 0;
     0 1 0; 
     l_inf'];
 
-I = permute(I, [2 1 3]);
-I2 = apply_H(I, H);
+
+I2 = apply_H(permute(I, [2 1 3]), H);
 
 % tform = projective2d(H);
 
@@ -257,20 +257,23 @@ angle_lr3_lr4 = acos(dot(normal_lr3, normal_lr4)/(norm_lr3*norm_lr4));
 
 
 % Compute the lines l1, m1, l2, m2, that pass through the different pairs of points
-l1 = lr1;m1 = lr2;l2 = lr3;m2 = lr4;
+l1 = lr1;
+m1 = lr2;
+l2 = lr3;
+m2 = lr4;
 
-x1 = cross(l1,l2);
-x2 = cross(l1,m2);
-x3 = cross(m1,m2);
-x4 = cross(m1,l2);
+x1 = cross(l1, l2);
+x2 = cross(l1, m2);
+x3 = cross(m1, m2);
+x4 = cross(m1, l2);
 
-l1=lr1;m1=lr3;
+l1 = lr1;m1 = lr3;
 
 d1 = cross(x1,x3);
 d2 = cross(x2,x4);
 
 % Show the chosen lines in the image
-figure;imshow(I);
+figure;imshow(I2);
 hold on;
 t = 1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
@@ -285,13 +288,15 @@ M = [l1(1)*m1(1), l1(1)*m1(2) + l1(2)*m1(1), l1(2)*m1(2);
 % Find s and S from the null space of the constraints matrix
 s = null(M);
 S = [s(1) s(2); s(2) s(3)];
-[K,p] = chol(S,'upper');
+[K, p] = chol(S, 'upper');
 
 Hm = eye(3);
 Hm(1:2,1:2) = inv(K);
 
 % Apply homography
-I3 = apply_H(I2, Hm);
+I3 = apply_H(permute(I2, [2 1 3]), Hm);
+I3 = permute(I3, [2 1 3]);
+
 
 % Compute the transformed lines lr1, lr2, lr3, lr4
 %  l'= H^-T*l
@@ -353,8 +358,7 @@ A = load('Data/0000_s_info_lines.txt');
 Pairs_lines = [424 712;...
                 565 240;...
                 534 227;
-                576 367;
-                424 565];
+                576 367];
 M = zeros(5, 6);
 
 colors = ['r','g','c','b','y'];
@@ -366,18 +370,18 @@ mr = zeros(5,3);
 angle_l_m = zeros(5,1);
 angle_lr_mr = zeros(5,1);
 
-for k = 1:5   
+for k = 1:4
     i = Pairs_lines(k, 1);
-    p1 = [A(i,1) A(i,2) 1]';
-    p2 = [A(i,3) A(i,4) 1]';
+    p1 = [A(i, 1) A(i, 2) 1]';
+    p2 = [A(i, 3) A(i, 4) 1]';
     
     i = Pairs_lines(k, 2);
-    p3 = [A(i,1) A(i,2) 1]';
-    p4 = [A(i,3) A(i,4) 1]';
+    p3 = [A(i, 1) A(i, 2) 1]';
+    p4 = [A(i, 3) A(i, 4) 1]';
     
     % Compute pair of orthogonal lines
-    l(:,k) = cross(p1, p2);
-    m(:,k) = cross(p3, p4);
+    l(:, k) = cross(p1, p2);
+    m(:, k) = cross(p3, p4);
     % Introduce values in the linear system to solve
     M(k, :) = [l(1,k)*m(1,k) (l(1,k)*m(2,k) + l(2,k)*m(1,k))/2 ...
         l(2,k)*m(2,k) (l(1,k)*m(3,k) + l(3,k)*m(1,k))/2 ...
@@ -389,6 +393,44 @@ for k = 1:5
     plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
     plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
 end
+%
+i = 424;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 240;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 712;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 565;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+l1 = cross(p1, p2);
+l2 = cross(p3, p4);
+l3 = cross(p5, p6);
+l4 = cross(p7, p8);
+
+x13 = cross(l1, l3);
+x23 = cross(l2, l3);
+x24 = cross(l2, l4);
+x14 = cross(l1, l4);
+
+k = 5;
+l(:, k) = cross(x14, x23);
+m(:, k) = cross(x13, x24);
+% Introduce values in the linear system to solve
+M(k, :) = [l(1,k)*m(1,k) (l(1,k)*m(2,k) + l(2,k)*m(1,k))/2 ...
+    l(2,k)*m(2,k) (l(1,k)*m(3,k) + l(3,k)*m(1,k))/2 ...
+    (l(2,k)*m(3,k) + l(3,k)*m(2,k))/2, l(3,k)*m(3,k)];
+
+hold on;
+t = 1:0.1:1000;
+plot(t, -(l(1,k)*t + l(3,k)) / l(2,k), colors(k));
+plot(t, -(m(1,k)*t + m(3,k)) / m(2,k), colors(k));
+
+
 % Compute the solution of M*c = 0, which is equivalent to find null space
 % of M
 c = null(M);
@@ -398,24 +440,30 @@ C_infinity = [c(1) c(2)/2 c(4)/2; ...
             c(4)/2 c(5)/2 c(6)];
         
 [U, S, V] = svd(C_infinity);
-% [P, D] = eig(C_infinity);
+
+[P, D] = eig(C_infinity);
+H = P;
 % isequal(U, V')
     
 % [U, lambda] = eig(C_infinity);
 % U_T = U';
-% ss = [sqrt(lambda(1)) 0; 0 sqrt(lambda(2))];
+% ss = [sqrt(lambda(1)) 0 0; 0 sqrt(lambda(2)) 0; 0 0 0];
 % U_T = ss*U_T;
 % U = U_T';
 % T = inv(U);
-
+% 
 % H = U*D;
 
+
 % Apply homography
-I2 = apply_H(I, U);
+I2 = apply_H(permute(I, [2 1 3]), H);
+I2 = permute(I2, [2 1 3]);
+
 
 H = inv(U)';
 
-%figure;imshow(uint8(I2));
+figure;imshow(uint8(I2));
+
 for k = 1:5
     % Compute the transformed lines -> l'= H^-T*l
     lr(k,:) = H*l(:,k);
