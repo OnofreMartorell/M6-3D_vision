@@ -6,15 +6,15 @@ addpath('sift');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute image correspondences
 
-%% Open images
+%% Load images
 
 imargb = imread('Data/llanes/llanes_a.jpg');
 imbrgb = imread('Data/llanes/llanes_b.jpg');
 imcrgb = imread('Data/llanes/llanes_c.jpg');
 
-imargb = imread('Data/castle_int/0016_s.png');
-imbrgb = imread('Data/castle_int/0015_s.png');
-imcrgb = imread('Data/castle_int/0014_s.png');
+% imargb = imread('Data/castle_int/0016_s.png');
+% imbrgb = imread('Data/castle_int/0015_s.png');
+% imcrgb = imread('Data/castle_int/0014_s.png');
 
 % imargb = imread('Data/aerial/site13/frame00000.png');
 % imbrgb = imread('Data/aerial/site13/frame00002.png');
@@ -111,8 +111,8 @@ title('Mosaic A-B-C');
 
 % Homography ab
 
-x = ...;  %ToDo: set the non-homogeneous point coordinates of the 
-xp = ...; %      point correspondences we will refine with the geometric method
+x = points_a(1:2, matches_ab(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b(1:2, matches_ab(2,:)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
 
@@ -137,6 +137,10 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 
+xhat = reshape(P(10:length(P)), 2, (length(P) - 9)/2);
+x_hat_hom = [xhat; ones(1, length(xhat))];
+x_hat_p_hom = Hab_r*x_hat_hom;
+xhatp = x_hat_p_hom(1:2, :)./x_hat_p_hom(3, :);
 figure;
 imshow(imargb);%image(imargb);
 hold on;
@@ -158,7 +162,10 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
-
+xhat = reshape(P(10:length(P)), 2, (length(P) - 9)/2);
+x_hat_hom = [xhat; ones(1, length(xhat))];
+x_hat_p_hom = Hbc_r*x_hat_hom;
+xhatp = x_hat_p_hom(1:2, :)./x_hat_p_hom(3, :);
 figure;
 imshow(imbrgb);%image(imbrgb);
 hold on;
