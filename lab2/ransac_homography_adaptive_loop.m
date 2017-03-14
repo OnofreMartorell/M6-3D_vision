@@ -18,7 +18,7 @@ while it < max_it
     
     % update estimate of max_it (the number of trials) to ensure we pick, 
     % with probability p, an initial data set with no outliers
-    fracinliers =  length(inliers)/Npoints;
+    fracinliers = length(inliers)/Npoints;
     pNoOutliers = 1 -  fracinliers^4;
     pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
     pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
@@ -42,7 +42,7 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
     
 
     % compute the symmetric geometric error
-    d2 = % ToDo
+    d2 = sum((x1-pinv(H)*x2).^2, 1)  + sum((x2-H*x1).^2, 1);% ToDo
     idx_inliers = find(d2 < th.^2);
 
 
