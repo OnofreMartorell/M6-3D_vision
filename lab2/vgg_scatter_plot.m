@@ -4,7 +4,7 @@ function vgg_scatter_plot(points,style)
 %Plots nonhomg points as a scatter plot
 
 if nargin == 1, style = '+'; end
-[r,c]=size(points);
+[r, c] = size(points);
 if r == 2
   h = plot(points(1,:),points(2,:),style);
 elseif r == 3

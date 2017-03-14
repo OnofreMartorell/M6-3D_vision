@@ -243,12 +243,34 @@ for i = 1:N
 end
 
 %% Compute the Image of the Absolute Conic
+V = zeros(2*N, 6)
+for i = 1:N
+    
+    V(2*i - 1, :) = [H{i}(1, 1)*H{i}(1, 2)
+                     H{i}(1, 1)*H{i}(2, 2) + H{i}(2, 1)*H{i}(1, 2)
+                     H{i}(1, 1)*H{i}(3, 2) + H{i}(3, 1)*H{i}(1, 2)
+                     H{i}(2, 1)*H{i}(2, 2)
+                     H{i}(2, 1)*H{i}(3, 2) + H{i}(3, 1)*H{i}(2, 2)
+                     H{i}(3, 1)*H{i}(3, 2)]; 
+                
+    V(2*i, :) = [H{i}(1, 1)*H{i}(1, 1)-(H{i}(1, 2)*H{i}(1, 2))    
+                 H{i}(1, 1)*H{i}(2, 1) + H{i}(2, 1)*H{i}(1, 1)-(H{i}(1, 2)*H{i}(2, 2) + H{i}(2, 2)*H{i}(1, 2))
+                 H{i}(1, 1)*H{i}(3, 1) + H{i}(3, 1)*H{i}(1, 1)-(H{i}(1, 2)*H{i}(3, 2) + H{i}(3, 2)*H{i}(1, 2))
+                 H{i}(2, 1)*H{i}(2, 1)-(H{i}(2, 2)*H{i}(2, 2))
+                 H{i}(2, 1)*H{i}(3, 1) + H{i}(3, 1)*H{i}(2, 1)-(H{i}(2, 2)*H{i}(3, 2) + H{i}(3, 2)*H{i}(2, 2))
+                 H{i}(3, 1)*H{i}(3, 1)-(H{i}(3, 2)*H{i}(3, 2))];   
+      
+end
 
-w = ... % ToDo
+[U, S, U_t] = svd(V);
+Omega = U_t(:, end);
+w = [Omega(1) Omega(2) Omega(3);
+    Omega(2) Omega(4) Omega(5);
+    Omega(3) Omega(5) Omega(6)] % ToDo
  
 %% Recover the camera calibration.
-
-K = ... % ToDo
+   
+K = chol(inv(w), 'upper'); % ToDo
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
@@ -260,9 +282,9 @@ P = cell(N,1);
 figure;hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
-    r1 = ...
-    r2 = ...
-    t{i} = ...
+    r1 = K\H{i}(: ,1);
+    r2 = K\H{i}(: ,2);
+    t{i} = K\H{i}(: ,3);
     
     % Solve the scale ambiguity by forcing r1 and r2 to be unit vectors.
     s = sqrt(norm(r1) * norm(r2)) * sign(t{i}(3));
@@ -272,7 +294,7 @@ for i = 1:N
     R{i} = [r1, r2, cross(r1,r2)];
     
     % Ensure R is a rotation matrix
-    [U S V] = svd(R{i});
+    [U, S, V] = svd(R{i});
     R{i} = U * eye(3) * V';
    
     P{i} = K * [R{i} t{i}];
