@@ -10,7 +10,7 @@ function [NewPts,T] = normPts(points)
     points(2,finiteind) = points(2,finiteind)./points(3,finiteind);
     points(3,finiteind) = 1;
 
-    c = mean(points(1:2,finiteind)')';            % Centroid of finite points
+    c = mean(points(1:2, finiteind)')';            % Centroid of finite points
     newp(1,finiteind) = points(1,finiteind)-c(1); % Shift origin to centroid.
     newp(2,finiteind) = points(2,finiteind)-c(2);
 

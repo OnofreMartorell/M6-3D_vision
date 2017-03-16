@@ -1,6 +1,6 @@
 function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 
-[Ncoords, Npoints] = size(x1);
+[~, Npoints] = size(x1);
 
 % ransac
 it = 0;
@@ -44,8 +44,11 @@ end
 
 
 % compute the symmetric geometric error
+projection_left = cross(x1, inv(H)*x2);
+projection_right = cross(x2, H*x1);
+d1 = sum(projection_left(1:2, :).^2, 1) + sum(projection_right(1:2, :).^2, 1);
 d2 = sum((x1 - pinv(H)*x2).^2, 1)  + sum((x2 - H*x1).^2, 1);% ToDo
-idx_inliers = find(d2 < th.^2);
+idx_inliers = find(d1 < th.^2);
 end
 
 function xn = normalise(x)
