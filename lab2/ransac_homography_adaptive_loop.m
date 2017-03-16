@@ -46,7 +46,7 @@ end
 % compute the symmetric geometric error
 projection_left = cross(x1, inv(H)*x2);
 projection_right = cross(x2, H*x1);
-d2 = sum(projection_left(1:2, :).^2, 1) + sum(projection_right(1:2, :).^2, 1);% ToDo
+d2 = sum(projection_left(1:2, :).^2, 1) + sum(projection_right(1:2, :).^2, 1);
 idx_inliers = find(d2 < th.^2);
 end
 
