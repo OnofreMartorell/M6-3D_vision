@@ -180,9 +180,9 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
+iwb = apply_H_v2(imbrgb, eye(3), corners); % ToDo: complete the call to the function
+iwa = apply_H_v2(imargb, Hab', corners); % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, Hbc, corners); % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
@@ -243,7 +243,7 @@ for i = 1:N
 end
 
 %% Compute the Image of the Absolute Conic
-V = zeros(2*N, 6)
+V = zeros(2*N, 6);
 for i = 1:N
     
     V(2*i - 1, :) = [H{i}(1, 1)*H{i}(1, 2)
@@ -266,7 +266,7 @@ end
 Omega = U_t(:, end);
 w = [Omega(1) Omega(2) Omega(3);
     Omega(2) Omega(4) Omega(5);
-    Omega(3) Omega(5) Omega(6)] % ToDo
+    Omega(3) Omega(5) Omega(6)]; % ToDo
  
 %% Recover the camera calibration.
    
