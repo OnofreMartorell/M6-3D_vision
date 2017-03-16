@@ -94,7 +94,7 @@ vgg_gui_H(imbrgb, imcrgb, Hbc);
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(imbrgb, eye(3) , corners);   % ToDo: complete the call to the function
 iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, Hbc, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
