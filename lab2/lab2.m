@@ -95,7 +95,7 @@ corners = [-400 1200 -100 650];
 iwb = apply_H_v2(imbrgb, eye(3) , corners);   % ToDo: complete the call to the function
 iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
 iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
-
+ 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
@@ -140,22 +140,41 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 xhat = reshape(P(10:length(P)), 2, (length(P) - 9)/2);
 x_hat_hom = [xhat; ones(1, length(xhat))];
 x_hat_p_hom = Hab_r*x_hat_hom;
-xhatp = x_hat_p_hom(1:2, :)./x_hat_p_hom(3, :);
+x_hat_p = x_hat_p_hom(1:2, :)./repmat(x_hat_p_hom(3, :), 2, 1);
 figure;
-imshow(imargb);%image(imargb);
+imshow(imargb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
 figure;
-imshow(imbrgb);%image(imbrgb);
+imshow(imbrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
-plot(xhatp(1,:), xhatp(2,:),'+c');
+plot(x_hat_p(1,:), x_hat_p(2,:),'+c');
 
 %%  Homography bc
 
 % ToDo: refine the homography bc with the Gold Standard algorithm
+x = points_b(1:2, matches_bc(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_c(1:2, matches_bc(2,:)); %      point correspondences we will refine with the geometric method
+Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
+P0 = [ Hbc(:) ; x(:) ];      % The parameters or independent variables
+
+Y_initial = gs_errfunction( P0, Xobs ); % ToDo: create this function that we need to pass to the lsqnonlin function
+% NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
+% (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
+err_initial = sum( sum( Y_initial.^2 ));
+
+options = optimset('Algorithm', 'levenberg-marquardt');
+P = lsqnonlin(@(t) gs_errfunction(t, Xobs), P0, [], [], options);
+
+Hbc_r = reshape( P(1:9), 3, 3 );
+f = gs_errfunction( P, Xobs ); % lsqnonlin does not return f
+err_final = sum( sum( f.^2 ));
+
+% we show the geometric error before and after the refinement
+fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err_final);
 
 
 %% See differences in the keypoint locations
@@ -165,29 +184,29 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 xhat = reshape(P(10:length(P)), 2, (length(P) - 9)/2);
 x_hat_hom = [xhat; ones(1, length(xhat))];
 x_hat_p_hom = Hbc_r*x_hat_hom;
-xhatp = x_hat_p_hom(1:2, :)./x_hat_p_hom(3, :);
+x_hat_p = x_hat_p_hom(1:2, :)./repmat(x_hat_p_hom(3, :), 2, 1);
 figure;
-imshow(imbrgb);%image(imbrgb);
+imshow(imbrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
 figure;
-imshow(imcrgb);%image(imcrgb);
+imshow(imcrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
-plot(xhatp(1,:), xhatp(2,:),'+c');
+plot(x_hat_p(1,:), x_hat_p(2,:),'+c');
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(imbrgb, eye(3), corners); % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, Hab', corners); % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, Hbc, corners); % ToDo: complete the call to the function
+iwa = apply_H_v2(imargb, Hab_r, corners); % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, inv(Hbc_r), corners); % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
-
+break
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Calibration with a planar pattern
 
@@ -231,8 +250,10 @@ for i = 1:N
     % Fit homography and remove outliers.
     x1 = pointsT(1:2, matches(1, :));
     x2 = points{i}(1:2, matches(2, :));
+    x1_hom = [x1; ones(length(x1), 1)];
+    x2_hom = [x2; ones(length(x2), 1)];
     H{i} = 0;
-    [H{i}, inliers] =  ransac_homography_adaptive_loop(homog(x1), homog(x2), 3, 1000);
+    [H{i}, inliers] =  ransac_homography_adaptive_loop(x1_hom, x2_hom, 3, 1000);
 
     % Plot inliers.
     figure;
@@ -321,23 +342,23 @@ figure; hold;
 plot_camera(K * eye(3,4), 800, 600, 200);
 % ToDo: complete the call to the following function with the proper
 %       coordinates of the image corners in the new reference system
-for i = 1:N
-    vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
-end
-
-%% Augmented reality: Plot some 3D points on every camera.
-[Th, Tw] = size(Tg);
+% for i = 1:N
+%     vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
+% end
+% 
+% %% Augmented reality: Plot some 3D points on every camera.
+% [Th, Tw] = size(Tg);
 cube = [0 0 0; 1 0 0; 1 0 0; 1 1 0; 1 1 0; 0 1 0; 0 1 0; 0 0 0; 0 0 1; 1 0 1; 1 0 1; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 0 1; 0 0 0; 1 0 0; 1 0 0; 1 0 1; 1 0 1; 0 0 1; 0 0 1; 0 0 0; 0 1 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 1 0; 0 0 0; 0 1 0; 0 1 0; 0 1 1; 0 1 1; 0 0 1; 0 0 1; 0 0 0; 1 0 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 1 0 1; 1 0 1; 1 0 0 ]';
-
-X = (cube - .5) * Tw / 4 + repmat([Tw / 2; Th / 2; -Tw / 8], 1, length(cube));
-
-for i = 1:N
-    figure; colormap(gray);
-    imagesc(Ig{i});
-    hold on;
-    x = euclid(P{i} * homog(X));
-    vgg_scatter_plot(x, 'g');
-end
+% 
+% X = (cube - .5) * Tw / 4 + repmat([Tw / 2; Th / 2; -Tw / 8], 1, length(cube));
+% 
+% for i = 1:N
+%     figure; colormap(gray);
+%     imagesc(Ig{i});
+%     hold on;
+%     x = euclid(P{i} * homog(X));
+%     vgg_scatter_plot(x, 'g');
+% end
 
 % ToDo: change the virtual object, use another 3D simple geometric object like a pyramid
 

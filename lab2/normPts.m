@@ -15,7 +15,7 @@ function [NewPts,T] = normPts(points)
     newp(2,finiteind) = points(2,finiteind)-c(2);
 
     dist = sqrt(newp(1,finiteind).^2 + newp(2,finiteind).^2);
-    meandist = mean(dist(:));  % Ensure dist is a column vector for Octave 3.0.1
+    meandist = mean(dist(:));  
 
     scale = sqrt(2)/meandist;
 
