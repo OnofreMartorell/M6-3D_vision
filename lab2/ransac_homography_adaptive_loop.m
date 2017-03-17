@@ -44,11 +44,31 @@ end
 
 
 % compute the symmetric geometric error
-projection_left = cross(x1, inv(H)*x2);
-projection_right = cross(x2, H*x1);
-d2 = sum(projection_left(1:2, :).^2, 1) + sum(projection_right(1:2, :).^2, 1);
-idx_inliers = find(d2 < th.^2);
+% projection_left = cross(x1, inv(H)*x2);
+ x1H = euclid(H*x1);
+ x2H = euclid(inv(H)*x2);
+ x1e = euclid(x1);
+ x2e = euclid(x2);
+% % projection_right = cross(x2, H*x1);
+ d2 = norm(x1e-x2H) + norm(x2e-x1H);
+%d2 = sum(projection_left(1:2, :).^2, 1) + sum(projection_right(1:2, :).^2, 1);
+% d2 = zeros(1,size(x1,2));
+% for i = 1:size(x1,2)
+%     d2(i) = compute_symmetric_difference(x1(:,i),x2(:,i),H);
+% end
+ idx_inliers = find(d2 < th.^2);
+
+
+
 end
+
+%
+% function diff =compute_symmetric_difference(x1,x2,H)
+% 
+% diff = norm(euclid(x1)-euclid(inv(H)*x2)) + norm(euclid(x2) - euclid(H*x1));
+% 
+% end
+
 
 function xn = normalise(x)
 xn = x ./ repmat(x(end,:), size(x,1), 1);
