@@ -13,10 +13,10 @@ function H = homography2d(x1, x2)
         x2n(3,i)*x1n(1,i) x2n(3,i)*x1n(2,i) x2n(3,i)*x1n(3,i) 0 0 0 -x2n(1,i)*x1n(1,i) -x2n(1,i)*x1n(2,i) -x2n(1,i)*x1n(3,i)];
     end
     
-    [U,D,V] = svd(A);
+    [~, ~, V] = svd(A);
     H_vector = V(:,end);
     H = reshape(H_vector,[3,3])';
     
     % Desnormalization
-    H = pinv(T2) * H * T1 ;
+    H = inv(T2) * H * T1 ;
 end
