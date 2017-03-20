@@ -138,9 +138,9 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % returned by the refinement with the Gold Standard algorithm
 
 xhat = reshape(P(10:length(P)), 2, (length(P) - 9)/2);
-x_hat_hom = [xhat; ones(1, length(xhat))];
+x_hat_hom = homog(xhat);
 x_hat_p_hom = Hab_r*x_hat_hom;
-x_hat_p = x_hat_p_hom(1:2, :)./repmat(x_hat_p_hom(3, :), 2, 1);
+x_hat_p = euclid(x_hat_p_hom);
 figure;
 imshow(imargb);
 hold on;
@@ -250,10 +250,9 @@ for i = 1:N
     % Fit homography and remove outliers.
     x1 = pointsT(1:2, matches(1, :));
     x2 = points{i}(1:2, matches(2, :));
-    x1_hom = [x1; ones(length(x1), 1)];
-    x2_hom = [x2; ones(length(x2), 1)];
+    
     H{i} = 0;
-    [H{i}, inliers] =  ransac_homography_adaptive_loop(x1_hom, x2_hom, 3, 1000);
+    [H{i}, inliers] =  ransac_homography_adaptive_loop(homog(x1), homog(x2), 3, 1000);
 
     % Plot inliers.
     figure;

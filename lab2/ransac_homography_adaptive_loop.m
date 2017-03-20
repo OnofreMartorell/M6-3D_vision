@@ -44,7 +44,7 @@ end
 
 % compute the symmetric geometric error
 
- d2 = sum((euclid(x1)-euclid(inv(H)*x2)).^2,1) + sum((euclid(x2)-euclid(H*x1)).^2,1);
+ d2 = sum((euclid(x1) - euclid(inv(H)*x2)).^2,1) + sum((euclid(x2) - euclid(H*x1)).^2,1);
  idx_inliers = find(d2 < th.^2);
 end
 

@@ -8,15 +8,17 @@ function Error_x = gs_errfunction( P0, Xobs )
 length_x_hat = (length(P0) - 9)/2;
 
 Homography = reshape( P0(1:9), 3, 3 );
-xx = reshape(Xobs, 2, length(Xobs)/2);
-x = [xx(:, 1:length(xx)/2); ones(1, length_x_hat)];
-xp = [xx(:, length(xx)/2 + 1:length(xx)); ones(1, length_x_hat)];
+xx = mat2cell(Xobs, [ length(Xobs)/2 length(Xobs)/2]);
+x_v = reshape(xx{1}', 2, length(xx{1})/2);
+xp_v = reshape(xx{2}', 2, length(xx{2})/2);
+x = homog(x_v);
+xp = homog(xp_v);
 
-x_hat = [reshape(P0(10:length(P0)), 2, length_x_hat); ones(1, length_x_hat)];
+x_hat = homog(reshape(P0(10:length(P0)), 2, length_x_hat));
 x_hat_p = Homography*x_hat;
 
-dist_left = norm(x - x_hat);
-dist_right = norm(xp - x_hat_p);
+dist_left = sqrt(sum((euclid(x) - euclid(x_hat)).^2, 1));
+dist_right = sqrt(sum((euclid(xp) - euclid(x_hat_p)).^2, 1));
 
-Error_x = [dist_left dist_right];
+Error_x = [dist_left; dist_right];
 end
