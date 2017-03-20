@@ -6,10 +6,18 @@ function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 it = 0;
 best_inliers = [];
 while it < max_it
-    
+
     % Take four pairs of points from the pairs of matches given
     points = randomsample(Npoints, 4);
     % Compute the homography using this four points
+    if all(~diff(x1(:, points)'))
+        continue;
+        %disp('The matches fall into the same point.');
+    elseif all(~diff(x2(:, points)'))
+        %disp('The matches fall into the same point.');
+        continue;
+    end
+    %disp('gets in');
     H = homography2d(x1(:, points), x2(:, points)); % ToDo: you have to create this function
     inliers = compute_inliers(H, x1, x2, th);
     
