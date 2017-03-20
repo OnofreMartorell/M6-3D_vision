@@ -110,9 +110,10 @@ title('Mosaic A-B-C');
 %% 4. Refine the homography with the Gold Standard algorithm
 
 % Homography ab
-
-x = points_a(1:2, matches_ab(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_b(1:2, matches_ab(2,:)); %      point correspondences we will refine with the geometric method
+points_matches_a = points_a(1:2, matches_ab(1,:));
+points_matches_b = points_b(1:2, matches_ab(2,:));
+x = points_matches_a(:, inliers_ab);%ToDo: set the non-homogeneous point coordinates of the 
+xp = points_matches_b(:, inliers_ab);%      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
 
@@ -156,8 +157,10 @@ plot(x_hat_p(1,:), x_hat_p(2,:),'+c');
 %%  Homography bc
 
 % ToDo: refine the homography bc with the Gold Standard algorithm
-x = points_b(1:2, matches_bc(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_c(1:2, matches_bc(2,:)); %      point correspondences we will refine with the geometric method
+points_matches_b = points_b(1:2, matches_bc(1,:));
+points_matches_c = points_c(1:2, matches_bc(2,:));
+x = points_matches_b(:, inliers_bc);%ToDo: set the non-homogeneous point coordinates of the 
+xp = points_matches_c(:, inliers_bc);%      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hbc(:) ; x(:) ];      % The parameters or independent variables
 
