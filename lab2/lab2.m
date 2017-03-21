@@ -287,33 +287,33 @@ end
 
 [U, S, U_t] = svd(V);
 Omega = U_t(:, end);
-w = [Omega(1) Omega(2) Omega(3);
+w = -[Omega(1) Omega(2) Omega(3);
     Omega(2) Omega(4) Omega(5);
     Omega(3) Omega(5) Omega(6)]; % ToDo
  
 %% Recover the camera calibration.
 
-[vec,val]=eig(w);
-val(val<0)=eps;
-w=vec*val*vec';
+[vec, val] = eig(w);
+val(val < 0) = eps;
+w = vec*val*vec';
 
-K = chol(inv(w), 'upper'); % ToDo
+K_inv = chol(w, 'upper'); % ToDo
 
-    
+K = inv(K);    
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
 %%
-w = -w;
-v_0 = (w(1,2)*w(1,3) - w(1, 1)*w(2, 3))/(w(1, 1)*w(2, 2) - w(1, 2)^2);
-lambda = w(3, 3) - (w(1, 3)^2 + v_0*(w(1, 2)*w(1, 3) - w(1, 1)*w(2, 3)))/w(1, 1);
-alpha = sqrt(lambda/w(1, 1));
-beta = sqrt(lambda*w(1, 1)/(w(1, 1)*w(2, 2) - w(1, 2)^2));
-gamma = -w(1, 2)*(alpha^2)*beta/lambda;
-u_0 = gamma*v_0/alpha - (w(1, 3)*(alpha^2)/lambda);
-
-K = [alpha gamma u_0; 
-    0 beta v_0;
-    0 0 1];
+% w = -w;
+% v_0 = (w(1,2)*w(1,3) - w(1, 1)*w(2, 3))/(w(1, 1)*w(2, 2) - w(1, 2)^2);
+% lambda = w(3, 3) - (w(1, 3)^2 + v_0*(w(1, 2)*w(1, 3) - w(1, 1)*w(2, 3)))/w(1, 1);
+% alpha = sqrt(lambda/w(1, 1));
+% beta = sqrt(lambda*w(1, 1)/(w(1, 1)*w(2, 2) - w(1, 2)^2));
+% gamma = -w(1, 2)*(alpha^2)*beta/lambda;
+% u_0 = gamma*v_0/alpha - (w(1, 3)*(alpha^2)/lambda);
+% 
+% K = [alpha gamma u_0; 
+%     0 beta v_0;
+%     0 0 1];
 %% Compute camera position and orientation.
 R = cell(N,1);
 t = cell(N,1);
