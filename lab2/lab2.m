@@ -8,17 +8,17 @@ addpath('sift');
 
 %% Load images
 
-imargb = imread('Data/llanes/llanes_a.jpg');
-imbrgb = imread('Data/llanes/llanes_b.jpg');
-imcrgb = imread('Data/llanes/llanes_c.jpg');
+% imargb = imread('Data/llanes/llanes_a.jpg');
+% imbrgb = imread('Data/llanes/llanes_b.jpg');
+% imcrgb = imread('Data/llanes/llanes_c.jpg');
 
 % imargb = imread('Data/castle_int/0016_s.png');
 % imbrgb = imread('Data/castle_int/0015_s.png');
 % imcrgb = imread('Data/castle_int/0014_s.png');
 
-% imargb = imread('Data/aerial/site13/frame00000.png');
-% imbrgb = imread('Data/aerial/site13/frame00002.png');
-% imcrgb = imread('Data/aerial/site13/frame00003.png');
+imargb = imread('Data/aerial/site13/frame00000.png');
+imbrgb = imread('Data/aerial/site13/frame00002.png');
+imcrgb = imread('Data/aerial/site13/frame00003.png');
 
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -32,9 +32,9 @@ imc = sum(double(imcrgb), 3) / 3 / 255;
 % imc = imcrgb;
 
 %% Compute SIFT keypoints
-[points_a, desc_a] = sift(ima, 'Threshold', 0.01);
-[points_b, desc_b] = sift(imb, 'Threshold', 0.01);
-[points_c, desc_c] = sift(imc, 'Threshold', 0.01);
+[points_a, desc_a] = sift(ima, 'Threshold', 0.05);
+[points_b, desc_b] = sift(imb, 'Threshold', 0.05);
+[points_c, desc_c] = sift(imc, 'Threshold', 0.05);
 
 figure;
 imshow(imargb);%image(imargb)
@@ -144,12 +144,14 @@ x_hat_p_hom = Hab_r*x_hat_hom;
 x_hat_p = euclid(x_hat_p_hom);
 figure;
 imshow(imargb);
+% imshow(imargb/255);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
 figure;
 imshow(imbrgb);
+% imshow(imbrgb/255);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(x_hat_p(1,:), x_hat_p(2,:),'+c');
@@ -189,12 +191,14 @@ x_hat_hom = [xhat; ones(1, length(xhat))];
 x_hat_p_hom = Hbc_r*x_hat_hom;
 x_hat_p = x_hat_p_hom(1:2, :)./repmat(x_hat_p_hom(3, :), 2, 1);
 figure;
+% imshow(imbrgb/255);
 imshow(imbrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
 figure;
+% imshow(imcrgb/255);
 imshow(imcrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
@@ -365,20 +369,96 @@ plot_camera(K * eye(3,4), 800, 600, 200);
 % end
 % 
 % %% Augmented reality: Plot some 3D points on every camera.
-% [Th, Tw] = size(Tg);
+[Th, Tw] = size(Tg);
 cube = [0 0 0; 1 0 0; 1 0 0; 1 1 0; 1 1 0; 0 1 0; 0 1 0; 0 0 0; 0 0 1; 1 0 1; 1 0 1; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 0 1; 0 0 0; 1 0 0; 1 0 0; 1 0 1; 1 0 1; 0 0 1; 0 0 1; 0 0 0; 0 1 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 1 0; 0 0 0; 0 1 0; 0 1 0; 0 1 1; 0 1 1; 0 0 1; 0 0 1; 0 0 0; 1 0 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 1 0 1; 1 0 1; 1 0 0 ]';
-% 
-% X = (cube - .5) * Tw / 4 + repmat([Tw / 2; Th / 2; -Tw / 8], 1, length(cube));
-% 
-% for i = 1:N
-%     figure; colormap(gray);
-%     imagesc(Ig{i});
-%     hold on;
-%     x = euclid(P{i} * homog(X));
-%     vgg_scatter_plot(x, 'g');
-% end
+
+X = (cube - .5) * Tw / 4 + repmat([Tw / 2; Th / 2; -Tw / 8], 1, length(cube));
+
+for i = 1:N
+    figure; colormap(gray);
+    imagesc(Ig{i});
+    hold on;
+    x = euclid(P{i} * homog(X));
+    vgg_scatter_plot(x, 'g');
+end
 
 % ToDo: change the virtual object, use another 3D simple geometric object like a pyramid
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. OPTIONAL: Add a logo to an image using the DLT algorithm
+clear all
+%% Read template and image.
+T     = imread('Data/calib/template.jpg');
+I  = imread('Data/calib/graffiti1.tif');
+
+Tg = sum(double(T), 3) / 3 / 255;
+Ig = sum(double(I), 3) / 3 / 255;
+
+
+%% Compute keypoints.
+fprintf('Computing sift points in template... ');
+[pointsT, descrT] = sift(Tg, 'Threshold', 0.05);
+fprintf(' done\n');
+
+
+fprintf('Computing sift points in image %d... ', i);
+[points, descr] = sift(Ig, 'Threshold', 0.05);
+fprintf(' done\n');
+
+
+%% Match and compute homographies.
+
+% Match against template descriptors.
+fprintf('Matching image 1... ');
+matches = siftmatch(descrT, descr);
+fprintf('done\n');
+
+% Fit homography and remove outliers.
+x1 = pointsT(1:2, matches(1, :));
+x2 = points(1:2, matches(2, :));
+
+[H, inliers] =  ransac_homography_adaptive_loop(homog(x1), homog(x2), 3, 1000);
+
+% Play with the homography
+vgg_gui_H(T, I, H);
+%% Compute the corners after transformation
+size_logo = size(T);
+% p1 = double([1, 1, 1]');
+% p2 = double([1, size_logo(2), 1]');
+% p3 = double([size_logo(1), 1, 1]');
+% p4 = double([size_logo(1), size_logo(2), 1]');
+
+p1 = double([1, 1, 1]');
+p2 = double([1, size_logo(1), 1]');
+p3 = double([size_logo(2), 1, 1]');
+p4 = double([size_logo(2), size_logo(1), 1]');
+% Transformation of corners in homogeneous coordinates
+p_transf_homogeneous = [(H*p1)'; (H*p2)'; (H*p3)'; (H*p4)'];
+
+% Cartesian coordinates of transformed corners
+p_transf_cartesian = [p_transf_homogeneous(:, 1)./p_transf_homogeneous(:, 3) ...
+    p_transf_homogeneous(:, 2)./p_transf_homogeneous(:, 3)];
+% hold on
+% scatter(round(p_transf_cartesian(:, 1)), round(p_transf_cartesian(:, 2)), 'r', 'filled')
+% Upleft and downright corners
+newzero = round(min(p_transf_cartesian));
+newend = round(max(p_transf_cartesian));
+mask = zeros(1080, 1920, 3);
+
+ys = newzero(1):newend(1);
+xs = newzero(2):newend(2);
+mask(xs, ys, :) = ones(length(xs), length(ys), 3);
+imshow(mask)
+
+%%
+corners = [ 1  1920 1 1080];
+new_logo = imread('Data/logo/logo_master.png');
+transform = apply_H_v2(new_logo, H, corners);
+
+insert_logo = uint8(double(transform).*mask + (1 - mask).*double(I));
+figure, imshow(insert_logo)
+
+% figure, imshow(I)
+%%
+ii = new_image == 0;
+imshow(double(ii))
