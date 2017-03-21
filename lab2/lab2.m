@@ -303,10 +303,11 @@ w = vec*val*vec';
 
 K_inv = chol(w, 'upper'); % ToDo
 
-K = inv(K);    
-% ToDo: in the report make some comments related to the obtained internal
-%       camera parameters and also comment their relation to the image size
-%%
+K = inv(K_inv);    
+
+% % ToDo: in the report make some comments related to the obtained internal
+% %       camera parameters and also comment their relation to the image size
+% %
 % w = -w;
 % v_0 = (w(1,2)*w(1,3) - w(1, 1)*w(2, 3))/(w(1, 1)*w(2, 2) - w(1, 2)^2);
 % lambda = w(3, 3) - (w(1, 3)^2 + v_0*(w(1, 2)*w(1, 3) - w(1, 1)*w(2, 3)))/w(1, 1);
@@ -325,9 +326,9 @@ P = cell(N,1);
 figure;hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
-    r1 = K\H{i}(: ,1);
-    r2 = K\H{i}(: ,2);
-    t{i} = K\H{i}(: ,3);
+    r1   = inv(K)*H{i}(: ,1);
+    r2   = inv(K)*H{i}(: ,2);
+    t{i} = inv(K)*H{i}(: ,3);
     
     % Solve the scale ambiguity by forcing r1 and r2 to be unit vectors.
     s = sqrt(norm(r1) * norm(r2)) * sign(t{i}(3));
