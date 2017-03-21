@@ -292,8 +292,13 @@ w = [Omega(1) Omega(2) Omega(3);
     Omega(3) Omega(5) Omega(6)]; % ToDo
  
 %% Recover the camera calibration.
-   
-K = chol(w, 'upper'); % ToDo
+
+[vec,val]=eig(w);
+val(val<0)=eps;
+w=vec*val*vec';
+
+K = chol(inv(w), 'upper'); % ToDo
+
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
