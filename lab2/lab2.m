@@ -262,7 +262,7 @@ for i = 1:N
     plotmatches(Tg, Ig{i}, pointsT(1:2,:), points{i}(1:2,:), matches(:, inliers));
 
     % Play with the homography
-    %vgg_gui_H(T, I{i}, H{i});
+    vgg_gui_H(T, I{i}, H{i});
 end
 
 %% Compute the Image of the Absolute Conic
@@ -293,11 +293,22 @@ w = [Omega(1) Omega(2) Omega(3);
  
 %% Recover the camera calibration.
    
-K = chol(inv(w), 'upper'); % ToDo
+K = chol(w, 'upper'); % ToDo
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
+%%
+w = -w;
+v_0 = (w(1,2)*w(1,3) - w(1, 1)*w(2, 3))/(w(1, 1)*w(2, 2) - w(1, 2)^2);
+lambda = w(3, 3) - (w(1, 3)^2 + v_0*(w(1, 2)*w(1, 3) - w(1, 1)*w(2, 3)))/w(1, 1);
+alpha = sqrt(lambda/w(1, 1));
+beta = sqrt(lambda*w(1, 1)/(w(1, 1)*w(2, 2) - w(1, 2)^2));
+gamma = -w(1, 2)*(alpha^2)*beta/lambda;
+u_0 = gamma*v_0/alpha - (w(1, 3)*(alpha^2)/lambda);
 
+K = [alpha gamma u_0; 
+    0 beta v_0;
+    0 0 1];
 %% Compute camera position and orientation.
 R = cell(N,1);
 t = cell(N,1);
