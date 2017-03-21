@@ -305,20 +305,9 @@ K_inv = chol(w, 'upper'); % ToDo
 
 K = inv(K_inv);    
 
-% % ToDo: in the report make some comments related to the obtained internal
-% %       camera parameters and also comment their relation to the image size
-% %
-% w = -w;
-% v_0 = (w(1,2)*w(1,3) - w(1, 1)*w(2, 3))/(w(1, 1)*w(2, 2) - w(1, 2)^2);
-% lambda = w(3, 3) - (w(1, 3)^2 + v_0*(w(1, 2)*w(1, 3) - w(1, 1)*w(2, 3)))/w(1, 1);
-% alpha = sqrt(lambda/w(1, 1));
-% beta = sqrt(lambda*w(1, 1)/(w(1, 1)*w(2, 2) - w(1, 2)^2));
-% gamma = -w(1, 2)*(alpha^2)*beta/lambda;
-% u_0 = gamma*v_0/alpha - (w(1, 3)*(alpha^2)/lambda);
-% 
-% K = [alpha gamma u_0; 
-%     0 beta v_0;
-%     0 0 1];
+% ToDo: in the report make some comments related to the obtained internal
+%       camera parameters and also comment their relation to the image size
+
 %% Compute camera position and orientation.
 R = cell(N,1);
 t = cell(N,1);
@@ -424,11 +413,6 @@ x2 = points(1:2, matches(2, :));
 vgg_gui_H(T, I, H);
 %% Compute the corners after transformation
 size_logo = size(T);
-% p1 = double([1, 1, 1]');
-% p2 = double([1, size_logo(2), 1]');
-% p3 = double([size_logo(1), 1, 1]');
-% p4 = double([size_logo(1), size_logo(2), 1]');
-
 p1 = double([1, 1, 1]');
 p2 = double([1, size_logo(1), 1]');
 p3 = double([size_logo(2), 1, 1]');
@@ -439,8 +423,7 @@ p_transf_homogeneous = [(H*p1)'; (H*p2)'; (H*p3)'; (H*p4)'];
 % Cartesian coordinates of transformed corners
 p_transf_cartesian = [p_transf_homogeneous(:, 1)./p_transf_homogeneous(:, 3) ...
     p_transf_homogeneous(:, 2)./p_transf_homogeneous(:, 3)];
-% hold on
-% scatter(round(p_transf_cartesian(:, 1)), round(p_transf_cartesian(:, 2)), 'r', 'filled')
+
 % Upleft and downright corners
 newzero = round(min(p_transf_cartesian));
 newend = round(max(p_transf_cartesian));
@@ -459,7 +442,3 @@ transform = apply_H_v2(new_logo, H, corners);
 insert_logo = uint8(double(transform).*mask + (1 - mask).*double(I));
 figure, imshow(insert_logo)
 
-% figure, imshow(I)
-%%
-ii = new_image == 0;
-imshow(double(ii))
