@@ -20,8 +20,8 @@ x2_test = P2 * X;
 
 % Estimated fundamental matrix
 % ToDo: create the following function that estimates F using the normalised 8 point algorithm
-F_es = fundamental_matrix(x2_test, x1_test);
-F_es2 = fundamental_matrix2(x2_test, x1_test);
+F_es = fundamental_matrix(x1_test, x2_test);
+F_es2 = fundamental_matrix2(x1_test, x2_test);
 
 % Real fundamental matrix
 
@@ -85,8 +85,8 @@ vgg_gui_F(im1rgb, im2rgb, F');
 
 %% Plot some epipolar lines
 
-l2 = ... % epipolar lines in image 2 % ToDo
-l1 = ... % epipolar lines in image 1 % ToDo
+l2 = F*p1; % epipolar lines in image 2 % ToDo
+l1 = F'*p2; % epipolar lines in image 1 % ToDo
 
 % choose three random indices
 m1 = inliers(10);

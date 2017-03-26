@@ -22,7 +22,7 @@ for i = 1:num_pairs
 end
 [~, ~, V] = svd(W);
 f = V(:, end);
-F_rank3 = reshape(f, [3, 3]);
+F_rank3 = reshape(f, [3, 3])';
 [U_f, D_f, V_f] = svd(F_rank3);
 D_f(3, 3) = 0;
 
