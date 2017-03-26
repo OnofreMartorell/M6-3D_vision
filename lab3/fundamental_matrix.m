@@ -1,16 +1,20 @@
 function f = fundamental_matrix(pts1h, pts2h)
-% % Normalize the points
-% num = cast(size(pts1h, 2), integerClass);
- [pts1h, t1] = normalise2dpts(pts1h);
- [pts2h, t2] = normalise2dpts(pts2h);
-% 
-% % Compute the constraint matrix
-% m = coder.nullcopy(zeros(num, 9, outputClass));
+
+
+
+% Normalize the points
+[pts1h, t1] = normalise2dpts(pts1h);
+[pts2h, t2] = normalise2dpts(pts2h);
+
+% Create matrix W
+[~, num_pairs] = size(pts1h);
+w = zeros(num_pairs, 9);
+
 for idx = 1: size(pts1h, 2)
-  w(idx,:) = [...
-    pts1h(1,idx)*pts2h(1,idx), pts1h(2,idx)*pts2h(1,idx), pts2h(1,idx), ...
-    pts1h(1,idx)*pts2h(2,idx), pts1h(2,idx)*pts2h(2,idx), pts2h(2,idx), ...
-                 pts1h(1,idx),              pts1h(2,idx), 1];
+    w(idx,:) = [...
+        pts1h(1,idx)*pts2h(1,idx), pts1h(2,idx)*pts2h(1,idx), pts2h(1,idx), ...
+        pts1h(1,idx)*pts2h(2,idx), pts1h(2,idx)*pts2h(2,idx), pts2h(2,idx), ...
+        pts1h(1,idx),              pts1h(2,idx), 1];
 end
 
 % Find out the eigen-vector corresponding to the smallest eigen-value.
@@ -28,5 +32,6 @@ f = t2' * f * t1;
 % Normalize the fundamental matrix.
 f = f / norm(f);
 if f(end) < 0
-  f = -f;
+    f = -f;
+end
 end
