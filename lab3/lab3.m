@@ -20,10 +20,16 @@ x2_test = P2 * X;
 
 % Estimated fundamental matrix
 % ToDo: create the following function that estimates F using the normalised 8 point algorithm
-F_es = fundamental_matrix(x1_test, x2_test);
+F_es = fundamental_matrix(x2_test, x1_test);
 
 % Real fundamental matrix
-F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+%F = K'^-T*[t_x]*R*K^-1
+% P1 = [I|0]; P2 = [R|t];--> K = K' = I;
+%--> F = [t_x]*R
+t_x = [0 -t(3) t(2);
+        t(3) 0 -t(1);
+        -t(2) t(1) 0];
+F_gt = t_x*R; % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
 F_gt/norm(F_gt)
@@ -62,7 +68,8 @@ p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
 % ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 2.0); 
+th = 2.0;
+[F, inliers] = ransac_fundamental_matrix(p1, p2, th); 
 
 % show inliers
 figure;
