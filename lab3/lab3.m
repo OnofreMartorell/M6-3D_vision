@@ -22,8 +22,12 @@ x2_test = P2 * X;
 % ToDo: create the following function that estimates F using the normalised 8 point algorithm
 F_es = fundamental_matrix(x1_test, x2_test);
 
+
 % Real fundamental matrix
-F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+A = eye(3) * R' * t;
+C = [0 -A(3) A(2); A(3) 0 -A(1); -A(2) A(1) 0];
+F_gt = (pinv(eye(3)))' * R * eye(3)' * C; % ToDo: write the expression of the real fundamental matrix for P1 and P2
+                %K2'RK'[KR't]× but with K identity?
 
 % Evaluation: these two matrices should be very similar
 F_gt/norm(F_gt)
