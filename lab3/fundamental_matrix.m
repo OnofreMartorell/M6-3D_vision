@@ -1,7 +1,5 @@
 function f = fundamental_matrix(pts1h, pts2h)
 
-
-
 % Normalize the points
 [pts1h, t1] = normalise2dpts(pts1h);
 [pts2h, t2] = normalise2dpts(pts2h);

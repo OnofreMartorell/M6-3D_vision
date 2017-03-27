@@ -39,7 +39,6 @@ F_gt = t_x*R; % ToDo: write the expression of the real fundamental matrix for P1
 F_gt/norm(F_gt)
 F_es/norm(F_es)
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
 

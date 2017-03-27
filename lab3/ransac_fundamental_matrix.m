@@ -1,6 +1,5 @@
 function [F, idx_inliers] = ransac_fundamental_matrix(p1, p2, th)
 
-
 [~, num_pairs] = size(p1);
 
 % ransac
@@ -11,7 +10,7 @@ best_inliers = [];
 p = 0.999; 
 while it < max_it
     
-    points = randomsample(num_pairs, 4);
+    points = randomsample(num_pairs, 8);
     F = fundamental_matrix(p1(:, points), p2(:, points));
 
     inliers = compute_inliers(F, p1, p2, th);
@@ -32,7 +31,7 @@ while it < max_it
     it = it + 1;
 end
 
-% compute F from all the inliers
+% compute F from the best_inliers
 F = fundamental_matrix(p1(:, best_inliers), p2(:, best_inliers));
 idx_inliers = best_inliers;
 end
@@ -49,10 +48,9 @@ end
 F_p1 = F_p1.^2;
 F_p2 = F_p2.^2;
 % Compute the Sampson error
-d2 = p2_F_p1./(F_p1(1, :) + F_p1(2, :) + F_p2(1, :) + F_p2(2, :));
+d2 = (p2_F_p1.^2)./(F_p1(1, :) + F_p1(2, :) + F_p2(1, :) + F_p2(2, :));
 idx_inliers = find(d2 < th.^2);
 end
-
 
 function item = randomsample(npts, n)
 a = 1:npts;
