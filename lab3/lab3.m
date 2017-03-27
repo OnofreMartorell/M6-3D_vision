@@ -159,6 +159,35 @@ subplot(2,2,4); imshow(im4rgb); axis image; title('Image 4');
 [points_4, desc_4] = sift(im4, 'Threshold', 0.015);
 
 %% ToDo:
+matches12 = siftmatch(desc_1, desc_2);
+matches13 = siftmatch(desc_1, desc_3);
+matches14 = siftmatch(desc_1, desc_3);
+
+% figure;
+% plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', 'v');
+
+% p1 and p2 contain the homogeneous coordinates of the matches
+p12 = [points_1(1:2, matches12(1,:)); ones(1, length(matches12))];
+p21 = [points_2(1:2, matches12(2,:)); ones(1, length(matches12))];
+p13 = [points_1(1:2, matches13(1,:)); ones(1, length(matches13))];
+p31 = [points_3(1:2, matches13(2,:)); ones(1, length(matches13))];
+p14 = [points_1(1:2, matches14(1,:)); ones(1, length(matches14))];
+p41 = [points_4(1:2, matches14(2,:)); ones(1, length(matches14))];
+
+% ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
+th = 2.0;
+[F12, inliers12] = ransac_fundamental_matrix(p12, p21, th); 
+[F13, inliers13] = ransac_fundamental_matrix(p13, p31, th); 
+[F14, inliers14] = ransac_fundamental_matrix(p14, p41, th); 
+
+% show inliers
+% figure;
+% plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
+% title('Inliers');
+
+vgg_gui_F(im1rgb, im2rgb, F12');
+vgg_gui_F(im1rgb, im3rgb, F13');
+vgg_gui_F(im1rgb, im4rgb, F14');
 
 % Take image im1 as reference image (image 1) and compute the fundamental 
 % matrices needed for computing the trajectory of point idx_car_I1
