@@ -161,7 +161,7 @@ subplot(2,2,4); imshow(im4rgb); axis image; title('Image 4');
 %% ToDo:
 matches12 = siftmatch(desc_1, desc_2);
 matches13 = siftmatch(desc_1, desc_3);
-matches14 = siftmatch(desc_1, desc_3);
+matches14 = siftmatch(desc_1, desc_4);
 
 % figure;
 % plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', 'v');
@@ -180,14 +180,14 @@ th = 2.0;
 [F13, inliers13] = ransac_fundamental_matrix(p13, p31, th); 
 [F14, inliers14] = ransac_fundamental_matrix(p14, p41, th); 
 
-% show inliers
+%show inliers
 % figure;
-% plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
+% plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches12(:,inliers12), 'Stacking', 'v');
 % title('Inliers');
-
-vgg_gui_F(im1rgb, im2rgb, F12');
-vgg_gui_F(im1rgb, im3rgb, F13');
-vgg_gui_F(im1rgb, im4rgb, F14');
+% 
+% vgg_gui_F(im1rgb, im2rgb, F12');
+% vgg_gui_F(im1rgb, im3rgb, F13');
+% vgg_gui_F(im1rgb, im4rgb, F14');
 
 % Take image im1 as reference image (image 1) and compute the fundamental 
 % matrices needed for computing the trajectory of point idx_car_I1
@@ -199,9 +199,9 @@ vgg_gui_F(im1rgb, im4rgb, F14');
 % ToDo: complete the code
 
 idx_car_I1 = 1197;
-idx_car_I2 = % ToDo: identify the corresponding point of idx_car_I1 in image 2
-idx_car_I3 = % ToDo: identify the corresponding point of idx_car_I1 in image 3
-idx_car_I4 = % ToDo: identify the corresponding point of idx_car_I1 in image 4
+idx_car_I2 = matches12(2,matches12(1,:)==idx_car_I1);% ToDo: identify the corresponding point of idx_car_I1 in image 2
+idx_car_I3 = matches13(2,matches13(1,:)==idx_car_I1);% ToDo: identify the corresponding point of idx_car_I1 in image 3
+idx_car_I4 = matches14(2,matches14(1,:)==idx_car_I1);% ToDo: identify the corresponding point of idx_car_I1 in image 4
 
 % coordinates (in image 1) of the keypoint idx_car_I1 (point in a van). 
 % point1_1 is the projection of a 3D point in the 3D trajectory of the van
@@ -212,7 +212,7 @@ point1_2 = [334 697 1]'; % (this is a given data)
 
 % l1 is the projection of the 3D trajectory of keypoint idx_car_I1
 % (it is the line that joins point1_1 and point1_2)
-l1 = % ToDo: compute the line
+l1 = cross(point1_1,point1_2);% ToDo: compute the line
 % plot the line
 figure;imshow(im1);
 hold on;
@@ -221,34 +221,35 @@ plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(points_1(1,1197), points_1(2,1197), 'y*');
 
 % ToDo: write the homogeneous coordinates of the corresponding point of idx_car_I1 in image 2
-point2 = %
+point2 = [points_2(1:2,idx_car_I2)' 1]';
 % ToDo: compute the epipolar line of point2 in the reference image
-l2 = %
+l2 = F12'*point2;%
 % plot the epipolar line
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'c');
+
 % ToDo: compute the projection of point idx_car_I2 in the reference image 
-pi2 = %
+pi2 = cross(l1,l2);%
 % plot this point
 plot(pi2(1)/pi2(3), pi2(2)/pi2(3), 'c*');
 
 % ToDo: write the homogeneous coordinates of the corresponding point of idx_car_I1 in image 3
-point3 = %
+point3 = [points_3(1:2,idx_car_I3)' 1]';%
 % ToDo: compute the epipolar line of point3 in the reference image
-l3 = %
+l3 = F13'*point3;%
 % plot the epipolar line
 plot(t, -(l3(1)*t + l3(3)) / l3(2), 'b');
 % ToDo: compute the projection of point idx_car_I3 in the reference image
-pi3 = %
+pi3 = cross(l1,l3);%
 plot(pi3(1)/pi3(3), pi3(2)/pi3(3), 'b*');
 
 % ToDo: write the homogeneous coordinates of the corresponding point of idx_car_I1 in image 4
-point4 = %
+point4 = [points_4(1:2,idx_car_I4)' 1]';%%
 % ToDo: compute the epipolar line of point4 in the reference image
-l4 = %
+l4 = F14'*point4;%
 % plot the epipolar line
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'g');
 % ToDo: compute the projection of point idx_car_I4 in the reference image
-pi4 = %
+pi4 = cross(l1,l4);%
 plot(pi4(1)/pi4(3), pi4(2)/pi4(3), 'g*');
 
 
