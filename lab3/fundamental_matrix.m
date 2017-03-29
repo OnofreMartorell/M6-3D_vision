@@ -1,35 +1,33 @@
-function f = fundamental_matrix(pts1h, pts2h)
+function F = fundamental_matrix(pts1h, pts2h)
 
-% Normalize the points
-[pts1h, t1] = normalise2dpts(pts1h);
-[pts2h, t2] = normalise2dpts(pts2h);
+% Normalizing the points
+[pts1hn, T1] = normalise2dpts(pts1h);
+[pts2hn, T2] = normalise2dpts(pts2h);
 
-% Create matrix W
-[~, num_pairs] = size(pts1h);
-w = zeros(num_pairs, 9);
+% Creating matrix W
+[~, num_pairs] = size(pts1hn);
+W = zeros(num_pairs, 9);
 
-for idx = 1: size(pts1h, 2)
-    w(idx,:) = [...
-        pts1h(1,idx)*pts2h(1,idx), pts1h(2,idx)*pts2h(1,idx), pts2h(1,idx), ...
-        pts1h(1,idx)*pts2h(2,idx), pts1h(2,idx)*pts2h(2,idx), pts2h(2,idx), ...
-        pts1h(1,idx),              pts1h(2,idx), 1];
+for i = 1: size(pts1hn, 2)
+    W(i,:) = [...
+        pts1hn(1,i)*pts2hn(1,i), pts1hn(2,i)*pts2hn(1,i), pts2hn(1,i), ...
+        pts1hn(1,i)*pts2hn(2,i), pts1hn(2,i)*pts2hn(2,i), pts2hn(2,i), ...
+        pts1hn(1,i),              pts1hn(2,i), 1];
 end
 
-% Find out the eigen-vector corresponding to the smallest eigen-value.
-[~, ~, vm] = svd(w);
-f = reshape(vm(:, end), 3, 3)';
+% Obtaining V matrix so last column is used as solution for F.
+[~, ~, v2] = svd(W);
+F = reshape(v2(:, end), 3, 3)';
 
-% Enforce rank-2 constraint
-[u, s, v] = svd(f);
+% Rank2 constraint
+[u, s, v] = svd(F);
 s(end) = 0;
-f = u * s * v';
+F = u * s * v';
 
-% Transform the fundamental matrix back to its original scale.
-f = t2' * f * t1;
-
-% Normalize the fundamental matrix.
-f = f / norm(f);
-if f(end) < 0
-    f = -f;
+% Transforming the fundamental matrix back.
+F = T2' * F * T1;
+F = F / norm(F);
+if F(end) < 0
+    F = -F;
 end
 end

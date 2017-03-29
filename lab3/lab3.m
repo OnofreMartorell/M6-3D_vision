@@ -21,7 +21,6 @@ x2_test = P2 * X;
 % Estimated fundamental matrix
 % ToDo: create the following function that estimates F using the normalised 8 point algorithm
 F_es = fundamental_matrix(x1_test, x2_test);
-F_es2 = fundamental_matrix2(x1_test, x2_test);
 
 % Real fundamental matrix
 
@@ -36,8 +35,19 @@ F_gt = t_x*R; % ToDo: write the expression of the real fundamental matrix for P1
 
 
 % Evaluation: these two matrices should be very similar
-F_gt/norm(F_gt)
-F_es/norm(F_es)
+F_gt/norm(F_gt);
+F_es/norm(F_es);
+
+threshold = 1e-10; 
+% set your level of accuracy for "equality" since computationally they are
+% not "equal"
+
+ if all(abs(F_gt/norm(F_gt)) - abs(F_es/norm(F_es))<=threshold)
+     disp('Both Fundamental Matrices are the same!')
+ else
+     disp('The matrices do not match...')
+ end
+ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
@@ -180,14 +190,6 @@ th = 2.0;
 [F13, inliers13] = ransac_fundamental_matrix(p13, p31, th); 
 [F14, inliers14] = ransac_fundamental_matrix(p14, p41, th); 
 
-%show inliers
-% figure;
-% plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches12(:,inliers12), 'Stacking', 'v');
-% title('Inliers');
-% 
-% vgg_gui_F(im1rgb, im2rgb, F12');
-% vgg_gui_F(im1rgb, im3rgb, F13');
-% vgg_gui_F(im1rgb, im4rgb, F14');
 
 % Take image im1 as reference image (image 1) and compute the fundamental 
 % matrices needed for computing the trajectory of point idx_car_I1
@@ -253,14 +255,3 @@ pi4 = cross(l1,l4);%
 plot(pi4(1)/pi4(3), pi4(2)/pi4(3), 'g*');
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 4. OPTIONAL: Photo-sequencing with your own images
-
-% 4.1 Take a set of images of a moving scene from different viewpoints at 
-%     different time instants. At least two images have to be taken from
-%     roughly the same location by the same camera.
-%
-% 4.2 Implement the first part (until line 16) of the Algorithm 1 of the 
-%     Photo-sequencing paper with a selection of the detected dynamic
-%     features. You may reuse the code generated for the previous question.
-%
