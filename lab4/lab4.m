@@ -2,7 +2,7 @@
 %% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
 % (optional: depth computation)
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Triangulation
@@ -29,14 +29,14 @@ X_test = [rand(3,n); ones(1,n)] + [zeros(2,n); 3 * ones(1,n); zeros(1,n)];
 x1_test = euclid(P1 * X_test);
 x2_test = euclid(P2 * X_test);
 
-N_test = size(x1_test,2);
-X_trian = zeros(4,N_test);
+N_test = size(x1_test, 2);
+X_train = zeros(4, N_test);
 for i = 1:N_test
-    X_trian(:,i) = triangulate(x1_test(:,i), x2_test(:,i), P1, P2, [2 2]);
+    X_train(:,i) = triangulate(x1_test(:, i), x2_test(:, i), P1, P2, [2 2]);
 end
 
 % error
-euclid(X_test) - euclid(X_trian)
+display(euclid(X_test) - euclid(X_train))
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,7 +47,7 @@ Irgb{1} = imread('Data/0001_s.png');
 Irgb{2} = imread('Data/0002_s.png');
 I{1} = sum(double(Irgb{1}), 3) / 3 / 255;
 I{2} = sum(double(Irgb{2}), 3) / 3 / 255;
-[h,w] = size(I{1});
+[h, w] = size(I{1});
 
 
 %% Compute keypoints and matches.
@@ -78,7 +78,7 @@ plotmatches(I{1}, I{2}, points{1}, points{2}, inlier_matches, 'Stacking', 'v');
 x1 = points{1}(:, inlier_matches(1, :));
 x2 = points{2}(:, inlier_matches(2, :));
 
-%vgg_gui_F(Irgb{1}, Irgb{2}, F');
+vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
 
@@ -91,20 +91,46 @@ scale = 0.3;
 H = [scale 0 0; 0 scale 0; 0 0 1];
 K = H * K;
 
-
+%E = K'^T F K
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = ...
+% K == I??
+% E = K'*F*K;
+E = K'*F*K;
+[U, diag, V] = svd(E);
+% Make elements of diagonal [1 1 0]
+factor_D = max(diag(:));
+diag = diag/factor_D;
+U = U*factor_D;
 
+Z = [ 0 1 0;
+    -1 0 0;
+    0 0 0];
+W = [0 -1 0;
+    1 0 0;
+    0 0 1];
 
+S = U*W*U';
+[U_S, ~, ~] = svd(S);
+T = U_S(:, end);
+
+R1 = U*W'*V';
+if det(R1) < 0
+    R1 = -R1;
+end
+
+R2 = U*W*V';
+if det(R2) < 0
+    R2 = -R2;
+end
 % ToDo: write the camera projection matrix for the first camera
-P1 = ...
+P1 = cat(2, eye(3), zeros(3, 1));
 
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = ...
-Pc2{2} = ...
-Pc2{3} = ...
-Pc2{4} = ...
+Pc2{1} = cat(2, R1, T);
+Pc2{2} = cat(2, R1, -T);
+Pc2{3} = cat(2, R2, T);
+Pc2{4} = cat(2, R2, -T);
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -124,7 +150,7 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = ...
+P2 = Pc2{4};
 
 % Triangulate all matches.
 N = size(x1,2);
