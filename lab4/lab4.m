@@ -78,7 +78,7 @@ plotmatches(I{1}, I{2}, points{1}, points{2}, inlier_matches, 'Stacking', 'v');
 x1 = points{1}(:, inlier_matches(1, :));
 x2 = points{2}(:, inlier_matches(2, :));
 
-vgg_gui_F(Irgb{1}, Irgb{2}, F');
+% vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
 
@@ -93,8 +93,7 @@ K = H * K;
 
 %E = K'^T F K
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-% K == I??
-% E = K'*F*K;
+
 E = K'*F*K;
 [U, diag, V] = svd(E);
 % Make elements of diagonal [1 1 0]
@@ -109,9 +108,10 @@ W = [0 -1 0;
     1 0 0;
     0 0 1];
 
-S = U*W*U';
+S = U*Z*U';
 [U_S, ~, ~] = svd(S);
 T = U_S(:, end);
+
 
 R1 = U*W'*V';
 if det(R1) < 0
@@ -122,6 +122,8 @@ R2 = U*W*V';
 if det(R2) < 0
     R2 = -R2;
 end
+
+
 % ToDo: write the camera projection matrix for the first camera
 P1 = cat(2, eye(3), zeros(3, 1));
 

@@ -1,6 +1,6 @@
 function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
 
-[Ncoords, Npoints] = size(x1);
+[~, Npoints] = size(x1);
 
 it = 0;
 max_it = 1000;
@@ -33,7 +33,7 @@ end
 % compute F from all the inliers
 F = fundamental_matrix(x1(:,best_inliers), x2(:,best_inliers));
 idx_inliers = best_inliers;
-
+end
 
 %--------------------------------------------------------------------------
 % Function to evaluate the first order approximation of the geometric error
@@ -57,11 +57,11 @@ function idx_inliers = compute_inliers(F, x1, x2, th)
 	     (Fx1(1,:).^2 + Fx1(2,:).^2 + Ftx2(1,:).^2 + Ftx2(2,:).^2);
 	
 	idx_inliers = find(abs(d) < th);   
-   
+end   
         
  
 function item = randomsample(npts, n)
-	a = [1:npts]; 
+	a = 1:npts; 
     item = zeros(1,n);    
     for i = 1:n
 	  % Generate random value in the appropriate range 
@@ -69,5 +69,5 @@ function item = randomsample(npts, n)
 	  item(i) = a(r);       % Select the rth element from the list
 	  a(r)    = a(end-i+1); % Overwrite selected element
     end                       % ... and repeat
-
+end
     
