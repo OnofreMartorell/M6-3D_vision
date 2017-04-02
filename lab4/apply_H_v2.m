@@ -1,4 +1,4 @@
-function I2=apply_H_v2(I, H, corners)
+function I2 = apply_H_v2(I, H, corners)
 
 % Apply the transformation H to the image I
 %

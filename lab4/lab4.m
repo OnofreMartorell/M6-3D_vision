@@ -161,7 +161,7 @@ for i = 1:N
     X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
 end
 
-
+X_euclid4 = euclid(X);
 
 %% Plot with colors
 r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
@@ -288,3 +288,35 @@ figure,imshow(disparity,[])
 %% 8. OPTIONAL:  Depth computation with Plane Sweeping
 
 % Implement the plane sweeping method explained in class.
+Irgb{1} = imread('Data/scene1.row3.col3.ppm');
+Irgb{2} = imread('Data/scene1.row3.col4.ppm');
+I{1} = sum(double(Irgb{1}), 3) / 3 / 255;
+I{2} = sum(double(Irgb{2}), 3) / 3 / 255;
+
+
+% The input parameters are 5:
+% - left image
+% - right image
+% - minimum disparity
+% - maximum disparity
+% - window size (e.g. a value of 3 indicates a 3x3 window)
+% - matching cost (the user may able to choose between SSD and NCC costs)
+%
+% In this part we ask to implement only the SSD cost
+%
+% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% 30x30) and the matching cost. Comment the results.
+%
+% Note 1: Use grayscale images
+% Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
+
+
+
+cost_function = 'ssd';
+
+disparity = plane_sweep(I1, I2, P1, P2, range_disp, size_window, cost_function);
+
+
+
+
+
