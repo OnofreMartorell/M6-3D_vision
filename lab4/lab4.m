@@ -209,6 +209,40 @@ axis equal;
 % Note 1: Use grayscale images
 % Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
 
+left_im = imread('Data/scene1.row3.col3.ppm');
+left_imGr = double(rgb2gray(left_im));
+right_im = imread('Data/scene1.row3.col4.ppm');
+right_imGr = double(rgb2gray(right_im));
+disparity_GT = imread('Data/truedisp.row3.col3.pgm');
+
+figure,
+subplot(1,2,1)
+imshow(left_im)
+axis square
+title ('left image')
+subplot(1,2,2)
+imshow(right_im)
+axis square
+title('right image')
+
+figure,
+subplot(1,2,1)
+imshow(left_imGr,[])
+axis square
+title ('Grayscale left image')
+subplot(1,2,2)
+imshow(right_imGr,[])
+axis square
+title('Grayscale right image')
+
+min_disp = 0;
+max_disp = 16;
+w_size = 3;
+matching_cost = 'SSD';
+
+disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
+figure,imshow(disparity,[])
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. OPTIONAL: Depth map computation with local methods (NCC)
