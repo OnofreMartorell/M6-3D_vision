@@ -253,6 +253,13 @@ figure,imshow(disparity,[])
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
+w_size = 3;
+matching_cost = 'NCC';
+
+disparity = stereo_computation2(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
+figure,imshow(disparity,[])
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Depth map computation with local methods
 
@@ -261,6 +268,41 @@ figure,imshow(disparity,[])
 % Test the functions implemented in the previous section with the facade
 % images. Try different matching costs and window sizes and comment the
 % results.
+
+left_im = imread('Data/0001_rectified_s.png');
+left_imGr = double(rgb2gray(left_im));
+right_im = imread('Data/0002_rectified_s.png');
+right_imGr = double(rgb2gray(right_im));
+
+figure,
+subplot(1,2,1)
+imshow(left_im)
+axis square
+title ('left image')
+subplot(1,2,2)
+imshow(right_im)
+axis square
+title('right image')
+
+figure,
+subplot(1,2,1)
+imshow(left_imGr,[])
+axis square
+title ('Grayscale left image')
+subplot(1,2,2)
+imshow(right_imGr,[])
+axis square
+title('Grayscale right image')
+
+min_disp = 0;
+max_disp = 16;
+w_size = 3;
+matching_cost = 'SSD'; % 'SSD' or 'NCC'
+
+disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
+figure,imshow(disparity,[])
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. OPTIONAL: Bilateral weights

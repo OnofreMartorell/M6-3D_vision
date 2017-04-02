@@ -17,15 +17,20 @@ for i = ceil(w_size/2):1:row-ceil(w_size/2)
           
            if strcmp(matching_cost,'SSD')
                 pixel_correlation(i,j,ind_disp) = sum(sum((block_left - block_right).^2));
-%            elseif strcmp(matching_cost,'NCC')
-%                %pixel_correlation(i,j,ind_disp) = ;
+            elseif strcmp(matching_cost,'NCC')
+               num =(block_left - mean2(block_left)).*(block_right - mean2(block_right));
+               den = sqrt(sum(sum((block_left - mean2(block_left)).^2)))*sqrt(sum(sum((block_right - mean2(block_right)).^2)));
+               pixel_correlation(i,j,ind_disp) = sum(sum(num/den));
            end
            ind_disp = ind_disp + 1;
        end
     end
 end
 
-[~,ind]=min(pixel_correlation,[],3);
+if strcmp(matching_cost,'SSD')
+    [~,ind]=min(pixel_correlation,[],3);
+ elseif strcmp(matching_cost,'NCC')
+    [~,ind]=max(pixel_correlation,[],3);
+end
 disparity = ind-1;
 end
-
