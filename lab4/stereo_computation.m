@@ -32,9 +32,9 @@ end
 
 
 if strcmp(matching_cost, 'SSD')
-    [~, ind] = min(pixel_correlation,[],3);
+    [~, ind] = min(pixel_correlation, [], 3);
  elseif strcmp(matching_cost, 'NCC')
-    [~, ind] = max(pixel_correlation,[],3);
+    [~, ind] = max(pixel_correlation, [], 3);
 end
 disparity = ind - 1;
 
