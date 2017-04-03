@@ -330,10 +330,12 @@ figure,imshow(disparity,[])
 %% 8. OPTIONAL:  Depth computation with Plane Sweeping
 
 % Implement the plane sweeping method explained in class.
-Irgb{1} = imread('Data/scene1.row3.col3.ppm');
-Irgb{2} = imread('Data/scene1.row3.col4.ppm');
-I{1} = sum(double(Irgb{1}), 3) / 3 / 255;
-I{2} = sum(double(Irgb{2}), 3) / 3 / 255;
+
+
+Irgb{1} = imread('Data/0001_rectified_s.png');
+Irgb{2} = imread('Data/0002_rectified_s.png');
+I1 = sum(double(Irgb{1}), 3) / 3 / 255;
+I2 = sum(double(Irgb{2}), 3) / 3 / 255;
 
 
 % The input parameters are 5:
@@ -354,9 +356,9 @@ I{2} = sum(double(Irgb{2}), 3) / 3 / 255;
 
 
 
-cost_function = 'ssd';
+cost_function = 'SSD';
 
-disparity = plane_sweep(I1, I2, P1, P2, range_disp, size_window, cost_function);
+disparity = plane_sweep(I1, I2, P1, P2, range_depth, size_window, cost_function);
 
 
 
