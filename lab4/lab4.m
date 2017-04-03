@@ -125,14 +125,14 @@ end
 
 
 % ToDo: write the camera projection matrix for the first camera
-P1 = cat(2, eye(3), zeros(3, 1));
+P1 = K*cat(2, eye(3), zeros(3, 1));
 
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = cat(2, R1, T);
-Pc2{2} = cat(2, R1, -T);
-Pc2{3} = cat(2, R2, T);
-Pc2{4} = cat(2, R2, -T);
+Pc2{1} = K*cat(2, R1, T);
+Pc2{2} = K*cat(2, R1, -T);
+Pc2{3} = K*cat(2, R2, T);
+Pc2{4} = K*cat(2, R2, -T);
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -152,16 +152,34 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = Pc2{4};
 
-% Triangulate all matches.
-N = size(x1,2);
-X = zeros(4,N);
-for i = 1:N
-    X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+for k = 1:length(Pc2)
+
+    % Triangulate all matches.
+    N = size(x1,2);
+    X = zeros(4,N);
+    for i = 1:N
+        X(:,i) = triangulate(x1(:,i), x2(:,i), P1, Pc2{k}, [w h]);
+    end
+
+    X_euclid4 = euclid(X);
+    if (X_euclid4(3,:)>0)
+        P2 = Pc2{k};
+        disp(strcat({'The correct matrix is number '},{num2str(k)}));
+    end
+        
 end
 
-X_euclid4 = euclid(X);
+
+    % Triangulate all matches.
+    N = size(x1,2);
+    X = zeros(4,N);
+    for i = 1:N
+        X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+    end
+
+    X_euclid4 = euclid(X);
+    
 
 %% Plot with colors
 r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
@@ -182,6 +200,12 @@ axis equal;
 % ToDo: compute the reprojection errors
 %       plot the histogram of reprojection errors, and
 %       plot the mean reprojection error
+
+
+d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*[x2;ones(1,size(x1,2))])).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
+histError = hist(d2);
+meanError = mean(d2);
+plot(histError);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
