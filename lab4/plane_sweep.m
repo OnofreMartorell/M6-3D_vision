@@ -6,7 +6,7 @@ sampling_depth = range_depth(1):step_disparity:range_depth(2);
 [heigth, width] = size(I2);
 % In third dimension, first value is for disparity/depth and second for min
 % cost
-disparity_computation = zeros([heigth width 2]);
+disparity_computation = Inf*ones([heigth width 2]);
 for k = 1:length(sampling_depth)
     d = sampling_depth(k);
     PI = P1(3, :) - [0 0 0 d];
@@ -34,6 +34,7 @@ for k = 1:length(sampling_depth)
                     cost_value = sum(sum((block_left - block_right).^2));
                     if cost_value < disparity_computation(i, j, 2)
                         disparity_computation(i, j, 1) = d;
+                        disparity_computation(i, j, 2) = cost_value;
                     end
                 case 'NCC'
                     num =(block_left - mean2(block_left)).*(block_right - mean2(block_right));
@@ -41,6 +42,7 @@ for k = 1:length(sampling_depth)
                     cost_value = sum(sum(num/den));
                     if cost_value > disparity_computation(i, j, 2)
                         disparity_computation(i, j, 1) = d;
+                        disparity_computation(i, j, 2) = cost_value;
                     end
             end            
         end

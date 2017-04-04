@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
+%% Lab 4: Reconstruction from two views (knowing internal camera parameters)
 % (optional: depth computation)
 
 addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
@@ -11,7 +11,7 @@ addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you hav
 %       with the homogeneous algebraic method (DLT)
 %
 %       The entries are (x1, x2, P1, P2, imsize), where:
-%           - x1, and x2 are the Euclidean coordinates of two matching 
+%           - x1, and x2 are the Euclidean coordinates of two matching
 %             points in two different images.
 %           - P1 and P2 are the two camera matrices
 %           - imsize is a two-dimensional vector with the image size
@@ -154,7 +154,7 @@ plot_camera(Pc2{4},w,h);
 % ToDo: Choose a second camera candidate by triangulating a match.
 points_in_front = [0 0 0 0];
 for k = 1:length(Pc2)
-
+    
     % Triangulate all matches.
     N = size(x1,2);
     X = zeros(4,N);
@@ -220,9 +220,9 @@ figure, plot(histError);
 % Disparity ground truth: 'truedisp.row3.col3.pgm'
 
 % Write a function called 'stereo_computation' that computes the disparity
-% between a pair of rectified images using a local method based on a matching cost 
+% between a pair of rectified images using a local method based on a matching cost
 % between two local windows.
-% 
+%
 % The input parameters are 5:
 % - left image
 % - right image
@@ -348,12 +348,12 @@ figure,imshow(disparity,[])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL:  Stereo computation with Belief Propagation
 
-% Use the UGM library used in module 2 and implement a  
-% stereo computation method that minimizes a simple stereo energy with 
-% belief propagation. 
-% For example, use an L2 pixel-based data term and 
-% the same regularization term you used in module 2. 
-% Or pick a stereo paper (based on belief propagation) from the literature 
+% Use the UGM library used in module 2 and implement a
+% stereo computation method that minimizes a simple stereo energy with
+% belief propagation.
+% For example, use an L2 pixel-based data term and
+% the same regularization term you used in module 2.
+% Or pick a stereo paper (based on belief propagation) from the literature
 % and implement it. Pick a simple method or just simplify the method they propose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
