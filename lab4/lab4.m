@@ -152,7 +152,7 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-
+points_in_front = [0 0 0 0];
 for k = 1:length(Pc2)
 
     % Triangulate all matches.
@@ -161,15 +161,21 @@ for k = 1:length(Pc2)
     for i = 1:N
         X(:,i) = triangulate(x1(:,i), x2(:,i), P1, Pc2{k}, [w h]);
     end
-
+    
     X_euclid4 = euclid(X);
-    if (X_euclid4(3,:)>0)
-        P2 = Pc2{k};
-        disp(strcat({'The correct matrix is number '},{num2str(k)}));
+    Raux = Pc2{k}(:,1:3);
+    Taux = Pc2{k}(:,4);
+    for i = 1:length(X_euclid4)
+        X_euclid4_2(:,i) = Raux*X_euclid4(:,i) + Taux;
     end
+    points_in_front(k) = sum(X_euclid4_2(3,:)>0);
+    
         
 end
 
+    [~, ind] = max(points_in_front);
+        P2 = Pc2{ind};
+        disp(strcat({'The correct matrix is number '},{num2str(ind)}));
 
     % Triangulate all matches.
     N = size(x1,2);
@@ -205,7 +211,7 @@ axis equal;
 d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*[x2;ones(1,size(x1,2))])).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
 histError = hist(d2);
 meanError = mean(d2);
-plot(histError);
+figure, plot(histError);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
