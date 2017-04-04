@@ -327,7 +327,7 @@ title('Grayscale right image')
 
 min_disp = 0;
 max_disp = 16;
-w_size = 3;
+w_size = 31;
 matching_cost = 'NCC';
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
@@ -381,7 +381,7 @@ title('Grayscale right image')
 min_disp = 0;
 max_disp = 16;
 w_size = 3;
-matching_cost = 'SSD'; % 'SSD' or 'NCC'
+matching_cost = 'NCC'; % 'SSD' or 'NCC'
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
 
