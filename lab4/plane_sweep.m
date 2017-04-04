@@ -4,6 +4,7 @@ function [ disparity ] = plane_sweep(I1, I2, P1, P2, range_depth, size_window, c
 length_side_window = ceil(size_window/2) - 1;
 sampling_depth = range_depth(1):step_depth:range_depth(2);
 [heigth, width] = size(I2);
+
 % In third dimension, first value is for disparity/depth and second for min
 % cost
 switch cost_function
@@ -34,16 +35,19 @@ for k = 1:length(sampling_depth)
                 min(i + length_side_window, heigth - length_side_window),...
             max(j - length_side_window, 1 + length_side_window):...
             min(j + length_side_window, width - length_side_window));
+            size_block = size(block_right);
+            w = (1/(sum(size_block)))*ones(size_block);
             switch cost_function
                 case 'SSD'
-                    cost_value = sum(sum((block_left - block_right).^2));
+                    cost_value = sum(sum((w.*(block_left - block_right).^2)));
                     if cost_value < disparity_computation(i, j, 2)
                         disparity_computation(i, j, 1) = d;
                         disparity_computation(i, j, 2) = cost_value;
                     end
                 case 'NCC'
-                    num =(block_left - mean2(block_left)).*(block_right - mean2(block_right));
-                    den = sqrt(sum(sum((block_left - mean2(block_left)).^2)))*sqrt(sum(sum((block_right - mean2(block_right)).^2)));
+                    num =w.*(block_left - mean2(w.*block_left)).*(block_right - mean2(w.*block_right));
+                    den = sqrt(sum(sum(w.*((block_left - mean2(w.*block_left)).^2))))*...
+                        sqrt(sum(sum(w.*((block_right - mean2(w.*block_right)).^2))));
                     cost_value = sum(sum(num/den));
                     if cost_value > disparity_computation(i, j, 2)
                         disparity_computation(i, j, 1) = d;

@@ -552,7 +552,7 @@ X_euclid4 = euclid(X);
 %%
 range_depth = [1 50];
 step_depth = 0.5;
-size_window = 9;
+size_window = 13;
 cost_function = 'SSD';
 
 disparity = plane_sweep(I{1}, I{2}, P1, P2, range_depth, size_window, cost_function, step_depth);
