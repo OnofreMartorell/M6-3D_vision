@@ -1,12 +1,17 @@
-function [ disparity ] = plane_sweep(I1, I2, P1, P2, range_depth, size_window, cost_function)
+function [ disparity ] = plane_sweep(I1, I2, P1, P2, range_depth, size_window, cost_function, step_depth)
 
-step_disparity = 1;
+
 length_side_window = ceil(size_window/2) - 1;
-sampling_depth = range_depth(1):step_disparity:range_depth(2);
+sampling_depth = range_depth(1):step_depth:range_depth(2);
 [heigth, width] = size(I2);
 % In third dimension, first value is for disparity/depth and second for min
 % cost
-disparity_computation = Inf*ones([heigth width 2]);
+switch cost_function
+    case 'SSD'
+        disparity_computation = Inf*ones([heigth width 2]);
+    case 'NCC'
+        disparity_computation = -Inf*ones([heigth width 2]);   
+end
 for k = 1:length(sampling_depth)
     d = sampling_depth(k);
     PI = P1(3, :) - [0 0 0 d];
@@ -15,7 +20,7 @@ for k = 1:length(sampling_depth)
     H = P2*A_hat;
     % Take into account those points that fall inside the area of the other
     % image
-    corners = [0 heigth 0 width]; %TODO
+    corners = [1 width 1 heigth]; %TODO
     I_reprojected = apply_H_v2(I1, H, corners);
     %For each point in the image
     for i = 1:heigth

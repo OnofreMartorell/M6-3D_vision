@@ -364,11 +364,6 @@ figure,imshow(disparity,[])
 % Implement the plane sweeping method explained in class.
 
 
-Irgb{1} = imread('Data/0001_rectified_s.png');
-Irgb{2} = imread('Data/0002_rectified_s.png');
-I1 = sum(double(Irgb{1}), 3) / 3 / 255;
-I2 = sum(double(Irgb{2}), 3) / 3 / 255;
-
 
 % The input parameters are 5:
 % - left image
@@ -384,15 +379,134 @@ I2 = sum(double(Irgb{2}), 3) / 3 / 255;
 % 30x30) and the matching cost. Comment the results.
 %
 % Note 1: Use grayscale images
-% Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
+
+% Read images
+Irgb{1} = imread('Data/0001_s.png');
+Irgb{2} = imread('Data/0002_s.png');
+I{1} = sum(double(Irgb{1}), 3) / 3 / 255;
+I{2} = sum(double(Irgb{2}), 3) / 3 / 255;
+[h, w] = size(I{1});
+
+
+% Compute keypoints and matches.
+points = cell(2,1);
+descr = cell(2,1);
+for i = 1:2
+    [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+    points{i} = points{i}(1:2,:);
+end
+
+matches = siftmatch(descr{1}, descr{2});
 
 
 
+% Fit Fundamental matrix and remove outliers.
+x1 = points{1}(:, matches(1, :));
+x2 = points{2}(:, matches(2, :));
+[F, inliers] = ransac_fundamental_matrix(homog(x1), homog(x2), 2.0);
+
+% Plot inliers.
+inlier_matches = matches(:, inliers);
+
+x1 = points{1}(:, inlier_matches(1, :));
+x2 = points{2}(:, inlier_matches(2, :));
+
+
+% Compute candidate camera matrices.
+
+% Camera calibration matrix
+K = [2362.12 0 1520.69; 0 2366.12 1006.81; 0 0 1];
+scale = 0.3;
+H = [scale 0 0; 0 scale 0; 0 0 1];
+K = H * K;
+
+
+E = K'*F*K;
+[U, diag, V] = svd(E);
+% Make elements of diagonal [1 1 0]
+factor_D = max(diag(:));
+diag = diag/factor_D;
+
+
+Z = [ 0 1 0;
+    -1 0 0;
+    0 0 0];
+W = [0 -1 0;
+    1 0 0;
+    0 0 1];
+
+S = U*Z*U';
+[U_S, ~, ~] = svd(S);
+T = U_S(:, end);
+
+
+R1 = U*W'*V';
+if det(R1) < 0
+    R1 = -R1;
+end
+
+R2 = U*W*V';
+if det(R2) < 0
+    R2 = -R2;
+end
+
+P1 = K*cat(2, eye(3), zeros(3, 1));
+
+Pc2 = {};
+Pc2{1} = K*cat(2, R1, T);
+Pc2{2} = K*cat(2, R1, -T);
+Pc2{3} = K*cat(2, R2, T);
+Pc2{4} = K*cat(2, R2, -T);
+
+
+
+% Reconstruct structure
+
+point_in_one = zeros(4,3);
+point_in_two = zeros(4,3);
+for k = 1:length(Pc2)
+    
+    % Triangulate all matches.
+    N = size(x1,2);
+    X = zeros(4,N);
+    for i = 1:N
+        X(:,i) = triangulate(x1(:,i), x2(:,i), P1, Pc2{k}, [w h]);
+    end
+    
+    X_euclid4 = euclid(X);
+    point_in_one(k,:)= X_euclid4(:,23);
+    
+    Raux = Pc2{k}(:,1:3);
+    Taux = Pc2{k}(:,4);
+    
+    point_in_two(k,:) = Raux*point_in_one(k,:)' + Taux;
+    
+end
+point_in_front = point_in_one(:,3)>0;
+points_in_two_front = point_in_two(:,3).*point_in_front;
+ind = find(points_in_two_front>0);
+
+P2 = Pc2{ind};
+disp(strcat({'The correct matrix is number '},{num2str(ind)}));
+
+% Triangulate all matches.
+N = size(x1,2);
+X = zeros(4,N);
+for i = 1:N
+    X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+end
+
+X_euclid4 = euclid(X);
+
+%%
+range_depth = [1 50];
+step_depth = 0.5;
+size_window = 9;
 cost_function = 'SSD';
 
-disparity = plane_sweep(I1, I2, P1, P2, range_depth, size_window, cost_function);
+disparity = plane_sweep(I{1}, I{2}, P1, P2, range_depth, size_window, cost_function, step_depth);
 
-
+figure,imshow(disparity,[])
 
 
 
