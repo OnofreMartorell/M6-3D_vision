@@ -166,8 +166,9 @@ for k = 1:length(Pc2)
     X_euclid4 = euclid(X);
     point_in_one(k,:)= X_euclid4(:,23);
     
-    Raux = Pc2{k}(:,1:3);
-    Taux = Pc2{k}(:,4);
+    RTaux = pinv(K)*Pc2{k};
+    Raux = RTaux(:,1:3);
+    Taux = RTaux(:,4);
  
     point_in_two(k,:) = Raux*point_in_one(k,:)' + Taux;
     
@@ -210,10 +211,12 @@ axis equal;
 %       plot the mean reprojection error
 
 
-d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*[x2;ones(1,size(x1,2))])).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
-histError = hist(d2);
+d2 = (sum((x1 - euclid(P1*(X))).^2)) + (sum((x2 - euclid(P2*X))).^2);
+edges = 0 : 0.25 : 5;
+figure, histError = histogram(d2,edges);
 meanError = mean(d2);
-figure, plot(histError);
+
+disp(strcat({'The mean error is '},{num2str(meanError)}));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
@@ -273,7 +276,18 @@ w_size = 3;
 matching_cost = 'SSD';
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
-figure,imshow(disparity,[])
+imshow(disparity,[])
+
+figure,
+subplot(1,2,1)
+imshow(disparity,[])
+axis square
+title ('Our disparity')
+subplot(1,2,2)
+imshow(disparity_GT,[])
+axis square
+title('disparity GT')
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,11 +299,49 @@ figure,imshow(disparity,[])
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
-w_size = 3;
+left_im = imread('Data/scene1.row3.col3.ppm');
+left_imGr = double(rgb2gray(left_im));
+right_im = imread('Data/scene1.row3.col4.ppm');
+right_imGr = double(rgb2gray(right_im));
+disparity_GT = imread('Data/truedisp.row3.col3.pgm');
+
+figure,
+subplot(1,2,1)
+imshow(left_im)
+axis square
+title ('left image')
+subplot(1,2,2)
+imshow(right_im)
+axis square
+title('right image')
+
+figure,
+subplot(1,2,1)
+imshow(left_imGr,[])
+axis square
+title ('Grayscale left image')
+subplot(1,2,2)
+imshow(right_imGr,[])
+axis square
+title('Grayscale right image')
+
+min_disp = 0;
+max_disp = 16;
+w_size = 31;
 matching_cost = 'NCC';
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
 figure,imshow(disparity,[])
+
+figure,
+subplot(1,2,1)
+imshow(disparity,[])
+axis square
+title ('Our disparity')
+subplot(1,2,2)
+imshow(disparity_GT,[])
+axis square
+title('disparity GT')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -329,12 +381,11 @@ title('Grayscale right image')
 min_disp = 0;
 max_disp = 16;
 w_size = 3;
-matching_cost = 'NCC'; % 'SSD' or 'NCC'
+matching_cost = 'SSD'; % 'SSD' or 'NCC'
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
+
 figure,imshow(disparity,[])
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. OPTIONAL: Bilateral weights
@@ -364,7 +415,6 @@ figure,imshow(disparity,[])
 % Implement the plane sweeping method explained in class.
 
 
-
 % The input parameters are 5:
 % - left image
 % - right image
@@ -379,6 +429,7 @@ figure,imshow(disparity,[])
 % 30x30) and the matching cost. Comment the results.
 %
 % Note 1: Use grayscale images
+
 
 % Read images
 Irgb{1} = imread('Data/0001_s.png');
