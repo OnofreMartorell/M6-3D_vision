@@ -398,6 +398,51 @@ figure,imshow(disparity,[])
 %
 % Note: Use grayscale images (the paper uses color images)
 
+left_im = imread('Data/scene1.row3.col3.ppm');
+left_imGr = double(rgb2gray(left_im));
+right_im = imread('Data/scene1.row3.col4.ppm');
+right_imGr = double(rgb2gray(right_im));
+disparity_GT = imread('Data/truedisp.row3.col3.pgm');
+
+figure,
+subplot(1,2,1)
+imshow(left_im)
+axis square
+title ('left image')
+subplot(1,2,2)
+imshow(right_im)
+axis square
+title('right image')
+
+figure,
+subplot(1,2,1)
+imshow(left_imGr,[])
+axis square
+title ('Grayscale left image')
+subplot(1,2,2)
+imshow(right_imGr,[])
+axis square
+title('Grayscale right image')
+
+min_disp = 0;
+max_disp = 16;
+w_size = 31;
+matching_cost = 'NCC';
+bilateral_weights = true;
+
+disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost,bilateral_weights);
+figure,imshow(disparity,[])
+
+figure,
+subplot(1,2,1)
+imshow(disparity,[])
+axis square
+title ('Our disparity')
+subplot(1,2,2)
+imshow(disparity_GT,[])
+axis square
+title('disparity GT')
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL:  Stereo computation with Belief Propagation
 
