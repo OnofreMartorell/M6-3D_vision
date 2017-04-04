@@ -99,7 +99,7 @@ E = K'*F*K;
 % Make elements of diagonal [1 1 0]
 factor_D = max(diag(:));
 diag = diag/factor_D;
-U = U*factor_D;
+
 
 Z = [ 0 1 0;
     -1 0 0;
@@ -152,7 +152,8 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-points_in_front = [0 0 0 0];
+point_in_one = zeros(4,3);
+point_in_two = zeros(4,3);
 for k = 1:length(Pc2)
     
     % Triangulate all matches.
@@ -163,17 +164,18 @@ for k = 1:length(Pc2)
     end
     
     X_euclid4 = euclid(X);
+    point_in_one(k,:)= X_euclid4(:,23);
+    
     Raux = Pc2{k}(:,1:3);
     Taux = Pc2{k}(:,4);
-    for i = 1:length(X_euclid4)
-        X_euclid4_2(:,i) = Raux*X_euclid4(:,i) + Taux;
-    end
-    points_in_front(k) = sum(X_euclid4_2(3,:)>0);
+ 
+    point_in_two(k,:) = Raux*point_in_one(k,:)' + Taux;
     
-        
 end
-
-    [~, ind] = max(points_in_front);
+    point_in_front = point_in_one(:,3)>0;
+    points_in_two_front = point_in_two(:,3).*point_in_front;
+    ind = find(points_in_two_front>0);
+    
         P2 = Pc2{ind};
         disp(strcat({'The correct matrix is number '},{num2str(ind)}));
 
