@@ -211,7 +211,7 @@ axis equal;
 %       plot the mean reprojection error
 
 
-d2 = sqrt(sum((x1 - euclid(P1*(X))).^2)) + sqrt(sum((x2 - euclid(P2*X))).^2);
+d2 = (sum((x1 - euclid(P1*(X))).^2)) + (sum((x2 - euclid(P2*X))).^2);
 edges = 0 : 0.25 : 5;
 figure, histError = histogram(d2,edges);
 meanError = mean(d2);
