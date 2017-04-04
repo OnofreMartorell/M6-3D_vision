@@ -166,8 +166,9 @@ for k = 1:length(Pc2)
     X_euclid4 = euclid(X);
     point_in_one(k,:)= X_euclid4(:,23);
     
-    Raux = Pc2{k}(:,1:3);
-    Taux = Pc2{k}(:,4);
+    RTaux = pinv(K)*Pc2{k};
+    Raux = RTaux(:,1:3);
+    Taux = RTaux(:,4);
  
     point_in_two(k,:) = Raux*point_in_one(k,:)' + Taux;
     
@@ -210,7 +211,7 @@ axis equal;
 %       plot the mean reprojection error
 
 
-d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*[x2;ones(1,size(x1,2))])).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
+d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*homog(x2))).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
 histError = hist(d2);
 meanError = mean(d2);
 figure, plot(histError);
