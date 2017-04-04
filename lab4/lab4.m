@@ -99,7 +99,7 @@ E = K'*F*K;
 % Make elements of diagonal [1 1 0]
 factor_D = max(diag(:));
 diag = diag/factor_D;
-U = U*factor_D;
+
 
 Z = [ 0 1 0;
     -1 0 0;
@@ -152,7 +152,8 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-
+point_in_one = zeros(4,3);
+point_in_two = zeros(4,3);
 for k = 1:length(Pc2)
     
     % Triangulate all matches.
@@ -163,23 +164,31 @@ for k = 1:length(Pc2)
     end
     
     X_euclid4 = euclid(X);
-    if (X_euclid4(3,:)>0)
-        P2 = Pc2{k};
-        disp(strcat({'The correct matrix is number '},{num2str(k)}));
-    end
+    point_in_one(k,:)= X_euclid4(:,23);
+    
+    RTaux = pinv(K)*Pc2{k};
+    Raux = RTaux(:,1:3);
+    Taux = RTaux(:,4);
+ 
+    point_in_two(k,:) = Raux*point_in_one(k,:)' + Taux;
     
 end
+    point_in_front = point_in_one(:,3)>0;
+    points_in_two_front = point_in_two(:,3).*point_in_front;
+    ind = find(points_in_two_front>0);
+    
+        P2 = Pc2{ind};
+        disp(strcat({'The correct matrix is number '},{num2str(ind)}));
 
+    % Triangulate all matches.
+    N = size(x1,2);
+    X = zeros(4,N);
+    for i = 1:N
+        X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+    end
 
-% Triangulate all matches.
-N = size(x1,2);
-X = zeros(4,N);
-for i = 1:N
-    X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
-end
-
-X_euclid4 = euclid(X);
-
+    X_euclid4 = euclid(X);
+    
 
 %% Plot with colors
 r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
@@ -202,10 +211,12 @@ axis equal;
 %       plot the mean reprojection error
 
 
-d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*[x2;ones(1,size(x1,2))])).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
-histError = hist(d2);
+d2 = sqrt(sum((x1 - euclid(P1*(X))).^2)) + sqrt(sum((x2 - euclid(P2*X))).^2);
+edges = 0 : 0.25 : 5;
+figure, histError = histogram(d2,edges);
 meanError = mean(d2);
-plot(histError);
+
+disp(strcat({'The mean error is '},{num2str(meanError)}));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
