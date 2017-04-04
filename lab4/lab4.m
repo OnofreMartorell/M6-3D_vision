@@ -211,10 +211,12 @@ axis equal;
 %       plot the mean reprojection error
 
 
-d2 = sqrt(sum((x1 - euclid(P1*pinv(P2)*homog(x2))).^2,1)) + sqrt(sum((x2 - euclid(P2*pinv(P1)*[x1;ones(1,size(x1,2))])).^2,1));
-histError = hist(d2);
+d2 = sqrt(sum((x1 - euclid(P1*(X))).^2)) + sqrt(sum((x2 - euclid(P2*X))).^2);
+edges = 0 : 0.25 : 5;
+figure, histError = histogram(d2,edges);
 meanError = mean(d2);
-figure, plot(histError);
+
+disp(strcat({'The mean error is '},{num2str(meanError)}));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
