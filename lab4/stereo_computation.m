@@ -16,7 +16,6 @@ for i = length_side_window + 1:row - length_side_window
         block_left = left_im((i - length_side_window):(i + length_side_window),...
             (j - length_side_window):(j + length_side_window));
         % Find the ssd or ncc cost with windows at the other image
-%         ind_disp = 1;
         for k = max( j - max_disp - length_side_window, 1 + length_side_window):...
                 min(col - length_side_window, j + max_disp - length_side_window)
             
@@ -38,25 +37,8 @@ for i = length_side_window + 1:row - length_side_window
                         disparity_computation(i, j, 2) = cost_value;
                     end
             end
-%             if strcmp(matching_cost,'SSD')
-%                 pixel_correlation(i, j, ind_disp) = sum(sum((block_left - block_right).^2));
-%             elseif strcmp(matching_cost, 'NCC')
-%                 num =(block_left - mean2(block_left)).*(block_right - mean2(block_right));
-%                 den = sqrt(sum(sum((block_left - mean2(block_left)).^2)))*sqrt(sum(sum((block_right - mean2(block_right)).^2)));
-%                 pixel_correlation(i, j, ind_disp) = sum(sum(num/den));
-%                 
-%             end
-%             ind_disp = ind_disp + 1;
         end
     end
 end
-
-
-% if strcmp(matching_cost, 'SSD')
-%     [~, ind] = min(pixel_correlation, [], 3);
-% elseif strcmp(matching_cost, 'NCC')
-%     [~, ind] = max(pixel_correlation, [], 3);
-% end
-% disparity = ind - 1;
 disparity = disparity_computation(:, :, 1);
 end

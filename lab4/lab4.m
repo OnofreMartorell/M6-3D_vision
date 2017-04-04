@@ -265,7 +265,18 @@ w_size = 3;
 matching_cost = 'SSD';
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
-figure,imshow(disparity,[])
+imshow(disparity,[])
+
+figure,
+subplot(1,2,1)
+imshow(disparity,[])
+axis square
+title ('Our disparity')
+subplot(1,2,2)
+imshow(disparity_GT,[])
+axis square
+title('disparity GT')
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -277,11 +288,49 @@ figure,imshow(disparity,[])
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
-w_size = 3;
+left_im = imread('Data/scene1.row3.col3.ppm');
+left_imGr = double(rgb2gray(left_im));
+right_im = imread('Data/scene1.row3.col4.ppm');
+right_imGr = double(rgb2gray(right_im));
+disparity_GT = imread('Data/truedisp.row3.col3.pgm');
+
+figure,
+subplot(1,2,1)
+imshow(left_im)
+axis square
+title ('left image')
+subplot(1,2,2)
+imshow(right_im)
+axis square
+title('right image')
+
+figure,
+subplot(1,2,1)
+imshow(left_imGr,[])
+axis square
+title ('Grayscale left image')
+subplot(1,2,2)
+imshow(right_imGr,[])
+axis square
+title('Grayscale right image')
+
+min_disp = 0;
+max_disp = 16;
+w_size = 31;
 matching_cost = 'NCC';
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
 figure,imshow(disparity,[])
+
+figure,
+subplot(1,2,1)
+imshow(disparity,[])
+axis square
+title ('Our disparity')
+subplot(1,2,2)
+imshow(disparity_GT,[])
+axis square
+title('disparity GT')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -321,12 +370,11 @@ title('Grayscale right image')
 min_disp = 0;
 max_disp = 16;
 w_size = 3;
-matching_cost = 'NCC'; % 'SSD' or 'NCC'
+matching_cost = 'SSD'; % 'SSD' or 'NCC'
 
 disparity = stereo_computation(left_imGr,right_imGr,min_disp,max_disp,w_size,matching_cost);
+
 figure,imshow(disparity,[])
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. OPTIONAL: Bilateral weights
@@ -355,12 +403,10 @@ figure,imshow(disparity,[])
 
 % Implement the plane sweeping method explained in class.
 
-
 Irgb{1} = imread('Data/0001_rectified_s.png');
 Irgb{2} = imread('Data/0002_rectified_s.png');
 I1 = sum(double(Irgb{1}), 3) / 3 / 255;
 I2 = sum(double(Irgb{2}), 3) / 3 / 255;
-
 
 % The input parameters are 5:
 % - left image
@@ -378,10 +424,7 @@ I2 = sum(double(Irgb{2}), 3) / 3 / 255;
 % Note 1: Use grayscale images
 % Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
 
-
-
 cost_function = 'SSD';
-
 disparity = plane_sweep(I1, I2, P1, P2, range_depth, size_window, cost_function);
 
 
