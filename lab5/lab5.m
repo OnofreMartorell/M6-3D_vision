@@ -2,8 +2,8 @@
 %% Lab 5: Reconstruction from uncalibrated viewas
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
-
+addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath(genpath('./vanishing_points_v0.4'));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 0. Create synthetic data
@@ -141,7 +141,7 @@ plot_camera2(P2,w,h);
 %% Create homogeneous coordinates
 
 % homogeneous 3D coordinates
-Xh=[X; ones(1,length(X))];
+Xh = [X; ones(1,length(X))];
 
 % homogeneous 2D coordinates
 x1 = P1*Xh;
@@ -171,8 +171,8 @@ x2(3,:) = x2(3,:)./x2(3,:);
 
 %% Check projected points (estimated and data points)
 
-for i=1:2
-    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
+for i = 1:2
+    x_proj{i} = euclid(Pproj(3*i - 2:3*i, :)*Xproj);
 end
 x_d{1} = euclid(P1*Xh);
 x_d{2} = euclid(P2*Xh);
