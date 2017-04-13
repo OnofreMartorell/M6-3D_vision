@@ -169,6 +169,11 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
+init = 'ones';
+%ToDo: implement other initializations
+[  Pproj,  Xproj ] = factorization_method( x1, x2 , init);
+
+
 %% Check projected points (estimated and data points)
 
 for i = 1:2
@@ -195,7 +200,7 @@ plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
 Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
 Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
-X=Xaux;
+X = Xaux;
 
 figure;
 hold on;
@@ -247,18 +252,19 @@ axis equal
 % [v1] = vanishing_point(xo1, xf1, xo2, xf2)
 
 % Compute the vanishing points in each image
-v1 = vanishing_point(x1(:,21),x1(:,22),x1(:,23),x1(:,24));
-v2 = vanishing_point(x1(:,21),x1(:,23),x1(:,22),x1(:,24));
-v3 = vanishing_point(x1(:,1),x1(:,2),x1(:,4),x1(:,3));
+v1 = vanishing_point(x1(:,21), x1(:,22), x1(:,23), x1(:,24));
+v2 = vanishing_point(x1(:,21), x1(:,23), x1(:,22), x1(:,24));
+v3 = vanishing_point(x1(:,1), x1(:,2), x1(:,4), x1(:,3));
 
-v1p = vanishing_point(x2(:,21),x2(:,22),x2(:,23),x2(:,24));
-v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
-v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
+v1p = vanishing_point(x2(:,21), x2(:,22), x2(:,23), x2(:,24));
+v2p = vanishing_point(x2(:,21), x2(:,23), x2(:,22), x2(:,24));
+v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 
-
+%Use triangulation
+X = triangulate(x1, x2, P1, P2, imsize)
 %% check results
 
 Xa = euclid(Hp*Xproj);
