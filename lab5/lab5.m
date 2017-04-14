@@ -262,9 +262,22 @@ v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-
+imsize = [2 2];
 %Use triangulation
-X = triangulate(x1, x2, P1, P2, imsize)
+Pproj_1 = Pproj(1:3, :);
+Pproj_2 = Pproj(4:6, :);
+V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
+V2 = triangulate(euclid(v2), euclid(v2p), Pproj_1, Pproj_2, imsize);
+V3 = triangulate(euclid(v3), euclid(v3p), Pproj_1, Pproj_2, imsize);
+
+A = [V1; V2; v3];
+
+[U_a, D_a, V_a] = svd(A);
+
+% What is right null vector of A?
+p = [0 0 0];
+
+Hp = [eye(3) zeros(3, 1); p 1]; 
 %% check results
 
 Xa = euclid(Hp*Xproj);
@@ -318,6 +331,29 @@ v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
+A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1)... 
+                    v1(2)*v2(2) v1(2)*v2(3) + v1(2)*v2(2) v1(3)*v2(3);
+                    v1(1)*v3(1) v1(1)*v3(2) + v1(2)*v3(1) v1(1)*v3(3) + v1(3)*v3(1)...
+                    v1(2)*v3(2) v1(2)*v3(3) + v1(2)*v3(2) v1(3)*v3(3);
+                    v2(1)*v3(1) v2(1)*v3(2) + v2(2)*v3(1) v2(1)*v3(3) + v2(3)*v3(1)... 
+                    v2(2)*v3(2) v2(2)*v3(3) + v2(2)*v3(2) v2(3)*v3(3);
+                    0 1 0 0 0 0;
+                    1 0 0 -1 0 0];
+                
+[U_w, D_w, V_w]  = svd(A_absolute_conic);
+
+% Null vector of A_absolute_conic
+W = [0 0 0 0 0 0];
+Absolute_conic = [W(1) W(2) W(3);
+                  W(2) W(4) W(5);
+                  W(3) W(5) W(6)];
+M = Pproj_1(:, 1:3);
+AA_t = pinv(M'*Absolute_conic*M);
+
+A = chol(AA_t);
+
+Ha = [pinv(A) zeros(3, 1);
+    zeros(1, 3) 1];
 %% check results
 
 Xa = euclid(Ha*Hp*Xproj);
