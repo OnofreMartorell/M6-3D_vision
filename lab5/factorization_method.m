@@ -50,7 +50,6 @@ while not(finished)
     
     V_4 = V(:, 1:4);
     P_M = U*D_4;
-    D_other = D(:,5:end);
     X_M = V_4';
     
     P_1 = P_M(1:3, :);
