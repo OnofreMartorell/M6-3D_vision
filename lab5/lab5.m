@@ -1,4 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 5: Reconstruction from uncalibrated viewas
 
 
@@ -171,7 +170,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 
 init = 'ones';
 %ToDo: implement other initializations
-[  Pproj,  Xproj ] = factorization_method( x1, x2 , init);
+[Pproj,  Xproj] = factorization_method( x1, x2 , init);
 
 
 %% Check projected points (estimated and data points)
@@ -262,7 +261,7 @@ v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-imsize = [2 2];
+imsize = [h w];
 %Use triangulation
 Pproj_1 = Pproj(1:3, :);
 Pproj_2 = Pproj(4:6, :);
@@ -270,12 +269,12 @@ V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
 V2 = triangulate(euclid(v2), euclid(v2p), Pproj_1, Pproj_2, imsize);
 V3 = triangulate(euclid(v3), euclid(v3p), Pproj_1, Pproj_2, imsize);
 
-A = [V1; V2; v3];
+A = [V1; V2; V3];
 
-[U_a, D_a, V_a] = svd(A);
+[~, ~, V_a] = svd(A);
 
-% What is right null vector of A?
-p = [0 0 0];
+% Is this the right null vector of A?
+p = V_a(:,end);
 
 Hp = [eye(3) zeros(3, 1); p 1]; 
 %% check results
@@ -342,8 +341,9 @@ A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2
                 
 [U_w, D_w, V_w]  = svd(A_absolute_conic);
 
-% Null vector of A_absolute_conic
-W = [0 0 0 0 0 0];
+% Null vector of A_absolute_conic. Correct??
+W = V_w(:,end);
+
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
@@ -398,7 +398,7 @@ axis equal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Projective reconstruction (real data)
 
-%% read images
+% Read images
 Irgb{1} = double(imread('Data/0000_s.png'))/255;
 Irgb{2} = double(imread('Data/0001_s.png'))/255;
 
@@ -406,13 +406,55 @@ I{1} = sum(Irgb{1}, 3) / 3;
 I{2} = sum(Irgb{2}, 3) / 3;
 
 Ncam = length(I);
+[h, w] = size(I{1});
+% Compute keypoints and matches.
+points = cell(2,1);
+descr = cell(2,1);
+for i = 1:Ncam
+    [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+    points{i} = points{i}(1:2,:);
+end
 
+matches = siftmatch(descr{1}, descr{2});
+x1 = homog(points{1}(:, matches(1, :)));
+x2 = homog(points{2}(:, matches(2, :)));
+
+% Plot matches.
+% figure();
+% plotmatches(I{1}, I{2}, points{1}, points{2}, matches, 'Stacking', 'v');
+
+%% Factorization method
 % ToDo: compute a projective reconstruction using the factorization method
 
+init = 'ones';
+%ToDo: implement other initializations
+[Pproj,  Xproj] = factorization_method( x1, x2 , init);
+
+
+%% Check projected points (estimated and data points)
 % ToDo: show the data points (image correspondences) and the projected
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
 
+
+for i = 1:2
+    x_proj{i} = euclid(Pproj(3*i - 2:3*i, :)*Xproj);
+end
+x_d{1} = euclid(x1);
+x_d{2} = euclid(x2);
+
+% image 1
+figure;
+hold on
+plot(x_d{1}(1,:),x_d{1}(2,:),'r*');
+plot(x_proj{1}(1,:),x_proj{1}(2,:),'bo');
+axis equal
+
+% image 2
+figure;
+hold on
+plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
+plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Affine reconstruction (real data)
 
@@ -426,21 +468,55 @@ Ncam = length(I);
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
 
-img_in =  'Data/0000_s.png'; % input image
+img_in1 =  'Data/0000_s.png'; % input image
+img_in2 =  'Data/0001_s.png'; % input image
 folder_out = '.'; % output folder
 manhattan = 1;
 acceleration = 0;
 focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
-[horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
+
+% Compute the vanishing points in each image
+[~, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
+[~, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
+% VPs contains all the vanishing points for each image
+v1 = VPs1(1, :);
+v2 = VPs1(2, :);
+v3 = VPs1(3, :);
+
+v1p = VPs2(1, :);
+v2p = VPs2(2, :);
+v3p = VPs2(3, :);
+
+% ToDo: use the vanishing points to compute the matrix Hp that 
+%       upgrades the projective reconstruction to an affine reconstruction
+imsize = [h w];
+%Use triangulation
+Pproj_1 = Pproj(1:3, :);
+Pproj_2 = Pproj(4:6, :);
+V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
+V2 = triangulate(euclid(v2), euclid(v2p), Pproj_1, Pproj_2, imsize);
+V3 = triangulate(euclid(v3), euclid(v3p), Pproj_1, Pproj_2, imsize);
+
+A = [V1; V2; v3];
+
+[U_a, D_a, V_a] = svd(A);
+
+% What is right null vector of A?
+p = V_a(:,end);
+
+Hp = [eye(3) zeros(3, 1); p 1]; 
+
 
 
 %% Visualize the result
 
 % x1m are the data points in image 1
 % Xm are the reconstructed 3D points (projective reconstruction)
-
+x1m = euclid(x1);
+Xm = Xproj;
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
@@ -458,6 +534,55 @@ axis equal;
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
 
+% Compute the vanishing points in each image
+[~, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
+% VPs contains all the vanishing points for each image
+v1 = VPs1(1, :);
+v2 = VPs1(2, :);
+v3 = VPs1(3, :);
+
+
+A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1)... 
+                    v1(2)*v2(2) v1(2)*v2(3) + v1(2)*v2(2) v1(3)*v2(3);
+                    v1(1)*v3(1) v1(1)*v3(2) + v1(2)*v3(1) v1(1)*v3(3) + v1(3)*v3(1)...
+                    v1(2)*v3(2) v1(2)*v3(3) + v1(2)*v3(2) v1(3)*v3(3);
+                    v2(1)*v3(1) v2(1)*v3(2) + v2(2)*v3(1) v2(1)*v3(3) + v2(3)*v3(1)... 
+                    v2(2)*v3(2) v2(2)*v3(3) + v2(2)*v3(2) v2(3)*v3(3);
+                    0 1 0 0 0 0;
+                    1 0 0 -1 0 0];
+                
+[U_w, D_w, V_w]  = svd(A_absolute_conic);
+
+% Null vector of A_absolute_conic. Correct??
+W = V_w(:,end);
+
+Absolute_conic = [W(1) W(2) W(3);
+                  W(2) W(4) W(5);
+                  W(3) W(5) W(6)];
+M = Pproj_1(:, 1:3);
+AA_t = pinv(M'*Absolute_conic*M);
+
+A = chol(AA_t);
+
+Ha = [pinv(A) zeros(3, 1);
+    zeros(1, 3) 1];
+
+%% Visualize the result
+
+% x1m are the data points in image 1
+% Xm are the reconstructed 3D points (projective reconstruction)
+x1m = euclid(x1);
+Xm = Xproj;
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = euclid(Ha*Hp*Xm);
+figure; hold on;
+[w,h] = size(I{1});
+for i = 1:length(Xe)
+    scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
+end;
+axis equal;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views
 
