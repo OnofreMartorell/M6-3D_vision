@@ -45,13 +45,13 @@ while not(finished)
     end
     Lambda_M = cat(1, Lambda(1,:), Lambda(1,:), Lambda(1,:), Lambda(2,:), Lambda(2,:), Lambda(2,:));
     M = Lambda_M.*x_matrix;
-    [U, D, V] = svd(M);
+    [U, D, V] = svd(M, 'econ');
     D_4 = D(:, 1:4);
     
-    V_4 = V(1:4, :);
+    V_4 = V(:, 1:4);
     P_M = U*D_4;
-    
-    X_M = V_4;
+    D_other = D(:,5:end);
+    X_M = V_4';
     
     P_1 = P_M(1:3, :);
     P_2 = P_M(4:6, :);
