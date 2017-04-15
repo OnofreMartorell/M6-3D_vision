@@ -269,14 +269,14 @@ V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
 V2 = triangulate(euclid(v2), euclid(v2p), Pproj_1, Pproj_2, imsize);
 V3 = triangulate(euclid(v3), euclid(v3p), Pproj_1, Pproj_2, imsize);
 
-A = [V1; V2; V3];
+A = [V1';V2';V3'];
 
 [~, ~, V_a] = svd(A);
 
 % Is this the right null vector of A?
 p = V_a(:, end);
 
-Hp = [eye(3) zeros(3, 1); p 1]; 
+Hp = [eye(3) zeros(3,1); euclid(p)' 1]; 
 %% check results
 
 Xa = euclid(Hp*Xproj);
