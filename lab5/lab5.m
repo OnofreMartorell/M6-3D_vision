@@ -2,7 +2,7 @@
 
 
 addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
-addpath(genpath('./vanishing_points_v0.4'));
+addpath(genpath('./vanishing_points_v0.4_compiled'));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 0. Create synthetic data
@@ -481,9 +481,10 @@ params.PLOT = 1;
 
 
 % Compute the vanishing points in each image
-[~, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
-[~, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
-% VPs contains all the vanishing points for each image
+% [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
+% [horizon2, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
+load VPs_real_images.mat
+% VPs contains all the vanishing points for each image??
 v1 = VPs1(1, :);
 v2 = VPs1(2, :);
 v3 = VPs1(3, :);
@@ -537,8 +538,9 @@ axis equal;
 % to a metric one and visualize the result in 3D as in the previous section
 
 % Compute the vanishing points in each image
-[~, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
-% VPs contains all the vanishing points for each image
+% [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
+load VPs_real_images.mat
+% VPs contains all the vanishing points for each image??
 v1 = VPs1(1, :);
 v2 = VPs1(2, :);
 v3 = VPs1(3, :);

@@ -23,6 +23,9 @@ for k = 1:length(sampling_depth)
     % image
     corners = [1 width 1 heigth]; %TODO
     I_reprojected = apply_H_v2(I1, H, corners);
+%     uuu = 0;
+%     figure,
+%     imshow(I_reprojected)
     %For each point in the image
     for i = 1:heigth
         for j = 1:width
