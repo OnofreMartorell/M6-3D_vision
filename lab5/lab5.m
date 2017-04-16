@@ -169,10 +169,25 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % in the previous iteration.
 
 init = 'ones'; % ones or Sturm
+init2 = 'Sturm'; 
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
+[Pproj_2,  Xproj_2] = factorization_method( x1, x2 , init2);
 
+%% Compute reprojection error.
 
+d1 = (sum((euclid(x1) - euclid(Pproj(1:3,:)*(Xproj))).^2)) + (sum((euclid(x2) - euclid(Pproj(4:6,:)*(Xproj))).^2));
+d2 = (sum((euclid(x1) - euclid(Pproj_2(1:3,:)*(Xproj_2))).^2)) + (sum((euclid(x2) - euclid(Pproj_2(4:6,:)*(Xproj_2))).^2));
+
+meanError1 = mean(d1);
+meanError2 = mean(d2);
+
+disp(strcat({'The mean error with ones initilization is '},{num2str(meanError1)}));
+disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError2)}));
+
+%disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check projected points (estimated and data points)
 
 for i = 1:2
@@ -432,7 +447,7 @@ x2 = homog(points{2}(:, matches(2, :)));
 % ToDo: compute a projective reconstruction using the factorization method
 
 init = 'ones';
-init2 = '';
+init2 = 'Sturm';
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 [Pproj_2,  Xproj_2] = factorization_method( x1, x2 , init2);
@@ -448,7 +463,7 @@ meanError2 = mean(d2);
 disp(strcat({'The mean error with ones initilization is '},{num2str(meanError1)}));
 disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError2)}));
 
-disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
+%disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
