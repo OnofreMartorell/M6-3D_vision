@@ -483,6 +483,9 @@ params.PLOT = 1;
 % Compute the vanishing points in each image
 % [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
 % [horizon2, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
+% NOTE: We had a problem and we could no compile the provided code with matlab.
+% % % We have compiled it with Octave, executed there and save the variables
+% % % that we need to use in this code
 load VPs_real_images.mat
 % VPs contains all the vanishing points for each image??
 v1 = VPs1(1, :);
@@ -539,6 +542,9 @@ axis equal;
 
 % Compute the vanishing points in each image
 % [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
+% NOTE: We had a problem and we could no compile the provided code with matlab.
+% % % We have compiled it with Octave, executed there and save the variables
+% % % that we need to use in this code
 load VPs_real_images.mat
 % VPs contains all the vanishing points for each image??
 v1 = VPs1(1, :);
