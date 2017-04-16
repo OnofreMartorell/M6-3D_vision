@@ -168,8 +168,8 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
-init = 'ones'; % ones or Sturm
-init2 = 'Sturm'; 
+init = 'Sturm'; % ones or Sturm
+init2 = 'ones'; 
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 [Pproj_2,  Xproj_2] = factorization_method( x1, x2 , init2);
@@ -182,8 +182,8 @@ d2 = (sum((euclid(x1) - euclid(Pproj_2(1:3,:)*(Xproj_2))).^2)) + (sum((euclid(x2
 meanError1 = mean(d1);
 meanError2 = mean(d2);
 
-disp(strcat({'The mean error with ones initilization is '},{num2str(meanError1)}));
-disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError2)}));
+disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError1)}));
+disp(strcat({'The mean error with ones initilization is '},{num2str(meanError2)}));
 
 %disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
 
@@ -274,7 +274,7 @@ v1p = vanishing_point(x2(:,21), x2(:,22), x2(:,23), x2(:,24));
 v2p = vanishing_point(x2(:,21), x2(:,23), x2(:,22), x2(:,24));
 v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
 %%
-load('vanishing_points.mat')
+%load('vanishing_points.mat')
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 imsize = [h w];
@@ -346,7 +346,7 @@ v1_m = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2_m = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3_m = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 %%
-load('vanishing_points_m.mat')
+%load('vanishing_points_m.mat')
 A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2_m(3) + v1_m(3)*v2_m(1)... 
                     v1_m(2)*v2_m(2) v1_m(2)*v2_m(3) + v1_m(3)*v2_m(2) v1_m(3)*v2_m(3);
                     v1_m(1)*v3_m(1) v1_m(1)*v3_m(2) + v1_m(2)*v3_m(1) v1_m(1)*v3_m(3) + v1_m(3)*v3_m(1)...
@@ -446,8 +446,8 @@ x2 = homog(points{2}(:, matches(2, :)));
 %% Factorization method
 % ToDo: compute a projective reconstruction using the factorization method
 
-init = 'ones';
-init2 = 'Sturm';
+init = 'Sturm';
+init2 = 'ones';
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 [Pproj_2,  Xproj_2] = factorization_method( x1, x2 , init2);
@@ -460,8 +460,8 @@ d2 = (sum((euclid(x1) - euclid(Pproj_2(1:3,:)*(Xproj_2))).^2)) + (sum((euclid(x2
 meanError1 = mean(d1);
 meanError2 = mean(d2);
 
-disp(strcat({'The mean error with ones initilization is '},{num2str(meanError1)}));
-disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError2)}));
+disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError1)}));
+disp(strcat({'The mean error with ones initilization is '},{num2str(meanError2)}));
 
 %disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
 
