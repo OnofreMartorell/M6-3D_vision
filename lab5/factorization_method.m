@@ -17,7 +17,19 @@ function [  Pproj,  Xproj ] = factorization_method( x1, x2 , init)
 if strcmp(init, 'ones')
     Lambda = ones(2, n);
 else
-    Lambda = 0;
+    x_cat = {x1, x2};
+    % j point i view
+    lamda1j = 1;
+    for i = 1:length(x_cat)
+        F = fundamental_matrix(x_cat{i}, x_cat{1});
+        e = null(F);
+        for j = 1:n 
+            num = x_cat{1}(:, j)'*F*cross(e, x_cat{i}(:,j));
+            den = norm(cross(e,x_cat{i}(:,j))).^2;
+            Lambda(i,j) = (num/den).*lamda1j;
+        end
+    end
+    
 end
 
 threshold = 0.1;

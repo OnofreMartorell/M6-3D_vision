@@ -168,7 +168,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
-init = 'ones';
+init = 'ones'; % ones or Sturm
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 
