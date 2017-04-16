@@ -29,7 +29,7 @@ else
             Lambda(i,j) = (num/den).*lamda1j;
         end
     end
-    
+    Lambda(1,:)=1;
 end
 
 threshold = 0.1;
