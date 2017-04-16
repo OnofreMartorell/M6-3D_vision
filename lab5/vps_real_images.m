@@ -16,5 +16,5 @@ params.PLOT = 1;
 [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
 [horizon2, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
 
-save('VPs_real_images.mat', horizon1, VPs1, horizon2, VPs2);
+save -mat7-binary 'VPs_real_images.mat' 'horizon1' 'VPs1' 'horizon2' 'VPs2'
 %[horizon01, VPs01] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
