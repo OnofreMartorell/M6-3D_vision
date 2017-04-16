@@ -258,10 +258,11 @@ v3 = vanishing_point(x1(:,1), x1(:,2), x1(:,4), x1(:,3));
 v1p = vanishing_point(x2(:,21), x2(:,22), x2(:,23), x2(:,24));
 v2p = vanishing_point(x2(:,21), x2(:,23), x2(:,22), x2(:,24));
 v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
-
+%%
+load('vanishing_points.mat')
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-imsize = [w h];
+imsize = [h w];
 %Use triangulation
 Pproj_1 = Pproj(1:3, :);
 Pproj_2 = Pproj(4:6, :);
@@ -326,17 +327,17 @@ axis equal
 % Use the following vanishing points given by three pair of orthogonal lines
 % and assume that the skew factor is zero and that pixels are square
 
-v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
-v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
-v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
+v1_m = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
+v2_m = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
+v3_m = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
 
-A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1)... 
-                    v1(2)*v2(2) v1(2)*v2(3) + v1(3)*v2(2) v1(3)*v2(3);
-                    v1(1)*v3(1) v1(1)*v3(2) + v1(2)*v3(1) v1(1)*v3(3) + v1(3)*v3(1)...
-                    v1(2)*v3(2) v1(2)*v3(3) + v1(3)*v3(2) v1(3)*v3(3);
-                    v2(1)*v3(1) v2(1)*v3(2) + v2(2)*v3(1) v2(1)*v3(3) + v2(3)*v3(1)... 
-                    v2(2)*v3(2) v2(2)*v3(3) + v2(3)*v3(2) v2(3)*v3(3);
+A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2_m(3) + v1_m(3)*v2_m(1)... 
+                    v1_m(2)*v2_m(2) v1_m(2)*v2_m(3) + v1_m(3)*v2_m(2) v1_m(3)*v2_m(3);
+                    v1_m(1)*v3_m(1) v1_m(1)*v3_m(2) + v1_m(2)*v3_m(1) v1_m(1)*v3_m(3) + v1_m(3)*v3_m(1)...
+                    v1_m(2)*v3_m(2) v1_m(2)*v3_m(3) + v1_m(3)*v3_m(2) v1_m(3)*v3_m(3);
+                    v2_m(1)*v3_m(1) v2_m(1)*v3_m(2) + v2_m(2)*v3_m(1) v2_m(1)*v3_m(3) + v2_m(3)*v3_m(1)... 
+                    v2_m(2)*v3_m(2) v2_m(2)*v3_m(3) + v2_m(3)*v3_m(2) v2_m(3)*v3_m(3);
                     0 1 0 0 0 0;
                     1 0 0 -1 0 0];
                 
@@ -348,8 +349,9 @@ W = V_w(:, end);
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
-% Is this the correct way to multiply by Hp??              
-M = Pproj_1(:, 1:3)*pinv(Hp);
+% Is this the correct way to multiply by Hp?? 
+P_affine = Pproj_1;%*pinv(Hp);
+M = P_affine(:, 1:3);
 AA_t = pinv(M'*Absolute_conic*M);
 
 A = chol(AA_t);
