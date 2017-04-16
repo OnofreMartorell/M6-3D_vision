@@ -330,8 +330,8 @@ axis equal
 v1_m = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2_m = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3_m = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
-
-
+%%
+load('vanishing_points_m.mat')
 A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2_m(3) + v1_m(3)*v2_m(1)... 
                     v1_m(2)*v2_m(2) v1_m(2)*v2_m(3) + v1_m(3)*v2_m(2) v1_m(3)*v2_m(3);
                     v1_m(1)*v3_m(1) v1_m(1)*v3_m(2) + v1_m(2)*v3_m(1) v1_m(1)*v3_m(3) + v1_m(3)*v3_m(1)...
