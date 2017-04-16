@@ -168,7 +168,8 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
-init = 'ones'; % ones or Sturm
+% init = 'ones'; % 'ones' or 'Sturm'
+init = 'Sturm';
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 
@@ -341,18 +342,19 @@ A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2
                     0 1 0 0 0 0;
                     1 0 0 -1 0 0];
                 
-[~, ~, V_w]  = svd(A_absolute_conic, 0);
+[~, ~, V_w]  = svd(A_absolute_conic);
 
 % Null vector of A_absolute_conic
 W = V_w(:, end);
-
+W(2) = 0;
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
 % Is this the correct way to multiply by Hp?? 
-P_affine = Pproj_1;%*pinv(Hp);
+P_affine = Pproj_1*pinv(Hp);
 M = P_affine(:, 1:3);
 AA_t = pinv(M'*Absolute_conic*M);
+% AA_t = M'*Absolute_conic*M;
 
 A = chol(AA_t);
 
@@ -430,7 +432,8 @@ x2 = homog(points{2}(:, matches(2, :)));
 %% Factorization method
 % ToDo: compute a projective reconstruction using the factorization method
 
-init = 'ones';
+% init = 'ones';
+init = 'Sturm';
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 
@@ -485,6 +488,7 @@ params.PLOT = 1;
 % Compute the vanishing points in each image
 % [horizon1, VPs1] = detect_vps(img_in1, folder_out, manhattan, acceleration, focal_ratio, params);
 % [horizon2, VPs2] = detect_vps(img_in2, folder_out, manhattan, acceleration, focal_ratio, params);
+
 % NOTE: We had a problem and we could no compile the provided code with matlab.
 % % % We have compiled it with Octave, executed there and save the variables
 % % % that we need to use in this code
@@ -508,14 +512,14 @@ V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
 V2 = triangulate(euclid(v2), euclid(v2p), Pproj_1, Pproj_2, imsize);
 V3 = triangulate(euclid(v3), euclid(v3p), Pproj_1, Pproj_2, imsize);
 
-A = [V1; V2; v3];
+A = [V1';V2';V3'];
 
-[U_a, D_a, V_a] = svd(A);
+[~, ~, V_a] = svd(A);
 
-% What is right null vector of A?
-p = V_a(:,end);
+% Is this the right null vector of A?
+p = V_a(:, end);
 
-Hp = [eye(3) zeros(3, 1); p 1]; 
+Hp = [eye(3) zeros(3,1); euclid(p)' 1]; 
 
 
 
