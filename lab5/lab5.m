@@ -168,8 +168,8 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
-init = 'ones'; % ones or Sturm
-init2 = 'Sturm'; 
+init2 = 'ones'; % ones or Sturm
+init = 'Sturm'; 
 %ToDo: implement other initializations
 [Pproj,  Xproj] = factorization_method( x1, x2 , init);
 [Pproj_2,  Xproj_2] = factorization_method( x1, x2 , init2);
@@ -182,8 +182,8 @@ d2 = (sum((euclid(x1) - euclid(Pproj_2(1:3,:)*(Xproj_2))).^2)) + (sum((euclid(x2
 meanError1 = mean(d1);
 meanError2 = mean(d2);
 
-disp(strcat({'The mean error with ones initilization is '},{num2str(meanError1)}));
-disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError2)}));
+disp(strcat({'The mean error with ones initilization is '},{num2str(meanError2)}));
+disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError1)}));
 
 %disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
 
@@ -522,19 +522,22 @@ params.PLOT = 1;
 % % % We have compiled it with Octave, executed there and save the variables
 % % % that we need to use in this code
 load VPs_real_images.mat
-% VPs contains all the vanishing points for each image??
-v1 = VPs1(1, :);
-v2 = VPs1(2, :);
-v3 = VPs1(3, :);
+% VPs contains all the vanishing points for each image
+VPs1_homog = homog(VPs1);
+VPs2_homog = homog(VPs2);
 
-v1p = VPs2(1, :);
-v2p = VPs2(2, :);
-v3p = VPs2(3, :);
+v1 = VPs1_homog(:, 1);
+v2 = VPs1_homog(:, 2);
+v3 = VPs1_homog(:, 3);
+
+v1p = VPs2_homog(:, 1);
+v2p = VPs2_homog(:, 1);
+v3p = VPs2_homog(:, 1);
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 imsize = [h w];
-%Use triangulation
+% Use triangulation
 Pproj_1 = Pproj(1:3, :);
 Pproj_2 = Pproj(4:6, :);
 V1 = triangulate(euclid(v1), euclid(v1p), Pproj_1, Pproj_2, imsize);
@@ -545,7 +548,7 @@ A = [V1';V2';V3'];
 
 [~, ~, V_a] = svd(A);
 
-% Is this the right null vector of A?
+% Right null vector of A
 p = V_a(:, end);
 
 Hp = [eye(3) zeros(3,1); euclid(p)' 1]; 
@@ -582,9 +585,11 @@ axis equal;
 % % % that we need to use in this code
 load VPs_real_images.mat
 % VPs contains all the vanishing points for each image??
-v1 = VPs1(1, :);
-v2 = VPs1(2, :);
-v3 = VPs1(3, :);
+VPs1_homog = homog(VPs1);
+
+v1 = VPs1_homog(:, 1);
+v2 = VPs1_homog(:, 2);
+v3 = VPs1_homog(:, 3);
 
 
 A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1)... 
@@ -598,13 +603,15 @@ A_absolute_conic = [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2
                 
 [U_w, D_w, V_w]  = svd(A_absolute_conic);
 
-% Null vector of A_absolute_conic. Correct??
+% Null vector of A_absolute_conic
 W = V_w(:,end);
 
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
-M = Pproj_1(:, 1:3);
+% M = Pproj_1(:, 1:3);
+P_affine = Pproj_1*pinv(Hp);
+M = P_affine(:, 1:3);
 AA_t = pinv(M'*Absolute_conic*M);
 
 A = chol(AA_t);
