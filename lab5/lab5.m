@@ -350,7 +350,7 @@ v1_m = vanishing_point(x2(:,2),x2(:,5),x2(:,3),x2(:,6));
 v2_m = vanishing_point(x2(:,1),x2(:,2),x2(:,3),x2(:,4));
 v3_m = vanishing_point(x2(:,1),x2(:,4),x2(:,2),x2(:,3));
 %%
-load('vanishing_points_m.mat')
+% load('vanishing_points_m.mat')
 A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2_m(3) + v1_m(3)*v2_m(1)... 
                     v1_m(2)*v2_m(2) v1_m(2)*v2_m(3) + v1_m(3)*v2_m(2) v1_m(3)*v2_m(3);
                     v1_m(1)*v3_m(1) v1_m(1)*v3_m(2) + v1_m(2)*v3_m(1) v1_m(1)*v3_m(3) + v1_m(3)*v3_m(1)...
@@ -442,6 +442,12 @@ end
 matches = siftmatch(descr{1}, descr{2});
 x1 = homog(points{1}(:, matches(1, :)));
 x2 = homog(points{2}(:, matches(2, :)));
+
+[~, inliers] = ransac_fundamental_matrix(x1, x2, 2.0);
+inlier_matches = matches(:, inliers);
+
+x1 = homog(points{1}(:, inlier_matches(1, :)));
+x2 = homog(points{2}(:, inlier_matches(2, :)));
 
 % Plot matches.
 % figure();
