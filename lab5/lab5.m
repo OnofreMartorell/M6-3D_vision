@@ -266,7 +266,7 @@ axis equal
 % ToDo: create the function 'vanishing_point' that computes the vanishing
 % point formed by the line that joins points xo1 and xf1 and the line 
 % that joins points x02 and xf2
-%
+% 
 % [v1] = vanishing_point(xo1, xf1, xo2, xf2)
 
 % Compute the vanishing points in each image
@@ -278,7 +278,7 @@ v1p = vanishing_point(x2(:,21), x2(:,22), x2(:,23), x2(:,24));
 v2p = vanishing_point(x2(:,21), x2(:,23), x2(:,22), x2(:,24));
 v3p = vanishing_point(x2(:,1), x2(:,2), x2(:,4), x2(:,3));
 %%
-%load('vanishing_points.mat')
+load('vanishing_points.mat')
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 imsize = [h w];
@@ -350,7 +350,7 @@ v1_m = vanishing_point(x2(:,2),x2(:,5),x2(:,3),x2(:,6));
 v2_m = vanishing_point(x2(:,1),x2(:,2),x2(:,3),x2(:,4));
 v3_m = vanishing_point(x2(:,1),x2(:,4),x2(:,2),x2(:,3));
 %%
-%load('vanishing_points_m.mat')
+load('vanishing_points_m.mat')
 A_absolute_conic = [v1_m(1)*v2_m(1) v1_m(1)*v2_m(2) + v1_m(2)*v2_m(1) v1_m(1)*v2_m(3) + v1_m(3)*v2_m(1)... 
                     v1_m(2)*v2_m(2) v1_m(2)*v2_m(3) + v1_m(3)*v2_m(2) v1_m(3)*v2_m(3);
                     v1_m(1)*v3_m(1) v1_m(1)*v3_m(2) + v1_m(2)*v3_m(1) v1_m(1)*v3_m(3) + v1_m(3)*v3_m(1)...
@@ -570,7 +570,7 @@ g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = euclid(Hp*Xm);
 figure; hold on;
-[w,h] = size(I{1});
+% [w,h] = size(I{1});
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
 end;
