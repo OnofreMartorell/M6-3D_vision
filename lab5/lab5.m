@@ -188,9 +188,6 @@ meanError2 = mean(d2);
 disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError1)}));
 disp(strcat({'The mean error with ones initilization is '},{num2str(meanError2)}));
 
-
-%disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check projected points (estimated and data points)
 
@@ -368,11 +365,11 @@ W(2) = 0;
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
-% Is this the correct way to multiply by Hp?? 
+ 
 P_affine = Pproj_1*pinv(Hp);
 M = P_affine(:, 1:3);
 AA_t = pinv(M'*Absolute_conic*M);
-% AA_t = M'*Absolute_conic*M;
+
 
 A = chol(AA_t);
 
@@ -467,9 +464,6 @@ meanError2 = mean(d2);
 disp(strcat({'The mean error with Sturm and Triggs initilization is '},{num2str(meanError1)}));
 disp(strcat({'The mean error with ones initilization is '},{num2str(meanError2)}));
 
-%disp('Sturm and Triggs initialization is noticeable better, so it is used for the rest of the lab.')
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Check projected points (estimated and data points)
 % ToDo: show the data points (image correspondences) and the projected
@@ -613,7 +607,7 @@ W = V_w(:,end);
 Absolute_conic = [W(1) W(2) W(3);
                   W(2) W(4) W(5);
                   W(3) W(5) W(6)];
-% M = Pproj_1(:, 1:3);
+
 P_affine = Pproj_1*pinv(Hp);
 M = P_affine(:, 1:3);
 AA_t = pinv(M'*Absolute_conic*M);
@@ -640,28 +634,3 @@ for i = 1:length(Xe)
 end;
 axis equal;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 7. OPTIONAL: Projective reconstruction from two views
-
-% ToDo: compute a projective reconstruction from the same two views 
-% by computing two possible projection matrices from the fundamental matrix
-% and one of the epipoles.
-% Then update the reconstruction to affine and metric as before (reuse the code).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 8. OPTIONAL: Projective reconstruction from more than two views
-
-% ToDo: extend the function that computes the projective reconstruction 
-% with the factorization method to the case of three views. You may use 
-% the additional image '0002_s.png'
-% Then update the reconstruction to affine and metric.
-%
-% Any other improvement you may icorporate (add a 4th view,
-% incorporate new 3D points by triangulation, incorporate new views
-% by resectioning, better visualization of the result with another
-% software, ...)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 9. OPTIONAL: Any other improvement you may icorporate 
-%
-%  (add a 4th view, incorporate new 3D points by triangulation, 
-%   apply any kind of processing on the point cloud, ...)
