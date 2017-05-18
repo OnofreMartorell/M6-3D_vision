@@ -14,6 +14,7 @@ switch cost_function
         disparity_computation = -Inf*ones([heigth width 2]);   
 end
 for k = 1:length(sampling_depth)
+    % Compute the homography that relates the two images
     d = sampling_depth(k);
     PI = P1(3, :) - [0 0 0 d];
     A = pinv([P1; PI]);
@@ -21,15 +22,13 @@ for k = 1:length(sampling_depth)
     H = P2*A_hat;
     % Take into account those points that fall inside the area of the other
     % image
-    corners = [1 width 1 heigth]; %TODO
-    I_reprojected = apply_H_v2(I1, H, corners);
-%     uuu = 0;
-%     figure,
-%     imshow(I_reprojected)
+    corners = [1 width 1 heigth]; 
+    I_reprojected = apply_H_v2(I2, pinv(H), corners);
+
     %For each point in the image
     for i = 1:heigth
         for j = 1:width
-            block_left  = I2(max(i - length_side_window, 1 + length_side_window):...
+            block_left  = I1(max(i - length_side_window, 1 + length_side_window):...
                 min(i + length_side_window, heigth - length_side_window),...
             max(j - length_side_window, 1 + length_side_window):...
             min(j + length_side_window, width - length_side_window));
@@ -38,7 +37,9 @@ for k = 1:length(sampling_depth)
                 min(i + length_side_window, heigth - length_side_window),...
             max(j - length_side_window, 1 + length_side_window):...
             min(j + length_side_window, width - length_side_window));
+        
             size_block = size(block_right);
+            
             w = (1/(sum(size_block)))*ones(size_block);
             switch cost_function
                 case 'SSD'

@@ -550,14 +550,28 @@ end
 X_euclid4 = euclid(X);
 
 %%
-range_depth = [1 50];
+scale_factor = 0.4;
+
+I_scaled{1} = imresize(I{1}, scale_factor);
+I_scaled{2} = imresize(I{2}, scale_factor);
+
+P1_scaled = P1;
+P2_scaled = P2;
+P1_scaled(1:2, :) = P1_scaled(1:2, :)*scale_factor;
+P2_scaled(1:2, :) = P2_scaled(1:2, :)*scale_factor;
+
+range_depth = [1 15];
 step_depth = 0.5;
-size_window = 13;
-cost_function = 'SSD';
+size_window = 17;
+cost_function = 'NCC';
 
-disparity = plane_sweep(I{1}, I{2}, P1, P2, range_depth, size_window, cost_function, step_depth);
+disparity = plane_sweep(I_scaled{1}, I_scaled{2}, P1_scaled, P2_scaled, range_depth, size_window, cost_function, step_depth);
 
-figure,imshow(disparity,[])
+figure,
+imshow(disparity,[])
+
+title(strcat('Step: ', num2str(step_depth), ', Scale: ', num2str(scale_factor)...
+    , ', size window:', num2str(size_window)))
 
 
 
